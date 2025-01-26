@@ -1,91 +1,81 @@
 import axios from "axios";
 
-const ProductService = {
-    async getAllProducts(page = 0, size = 10, keyword = '') {
+const ProductDetailService = {
+    async getAllProductDetails(page = 0, size = 10, keyword = '') {
         try {
-            const response = await axios.get(`http://localhost:8080/api/san-pham`, {
+            const response = await axios.get(`http://localhost:8080/api/san-pham-chi-tiet`, {
                 params: {
                     page,
                     size,
                     keyword,
                 },
             });
-            return response.data.data.content;
+            return response.data.data.content; // Access the content array
         } catch (error) {
-            console.error("Error fetching products:", error);
+            console.error("Error fetching product details:", error);
             throw error;
         }
     },
 
-    async getBrands() {
+    async getProductDetailById(id) {
         try {
-            const response = await axios.get(`http://localhost:8080/api/brands`);
+            const response = await axios.get(`http://localhost:8080/api/san-pham-chi-tiet/${id}`);
             return response.data.data;
         } catch (error) {
-            console.error("Error fetching brands:", error);
+            console.error("Error fetching product detail:", error);
             throw error;
         }
     },
 
-    async getOrigins() {
+    async createProductDetail(productDetailData) {
         try {
-            const response = await axios.get(`http://localhost:8080/api/origins`);
+            const response = await axios.post(`http://localhost:8080/api/san-pham-chi-tiet`, productDetailData);
             return response.data.data;
         } catch (error) {
-            console.error("Error fetching origins:", error);
+            console.error("Error creating product detail:", error);
             throw error;
         }
     },
 
-    async getMaterials() {
+    async updateProductDetail(id, productDetailData) {
         try {
-            const response = await axios.get(`http://localhost:8080/api/materials`);
+            const response = await axios.put(`http://localhost:8080/api/san-pham-chi-tiet/${id}`, productDetailData);
             return response.data.data;
         } catch (error) {
-            console.error("Error fetching materials:", error);
+            console.error("Error updating product detail:", error);
             throw error;
         }
     },
 
-    async getCollarTypes() {
+    async toggleProductDetailStatus(id) {
         try {
-            const response = await axios.get(`http://localhost:8080/api/collarTypes`);
+            const response = await axios.patch(`http://localhost:8080/api/san-pham-chi-tiet/${id}/toggle-trang-thai`);
             return response.data.data;
         } catch (error) {
-            console.error("Error fetching collar types:", error);
+            console.error("Error toggling product detail status:", error);
             throw error;
         }
     },
 
-    async getSleeveTypes() {
+    async deleteProductDetail(id) {
         try {
-            const response = await axios.get(`http://localhost:8080/api/sleeveTypes`);
-            return response.data.data;
+            const response = await axios.delete(`http://localhost:8080/api/san-pham-chi-tiet/${id}`);
+            return response.data;
         } catch (error) {
-            console.error("Error fetching sleeve types:", error);
+            console.error("Error deleting product detail:", error);
             throw error;
         }
     },
 
-    async getColors() {
+    async generateProductDetails(generateModel) {
         try {
-            const response = await axios.get(`http://localhost:8080/api/colors`);
+            const response = await axios.post(`http://localhost:8080/api/san-pham-chi-tiet/generate`, generateModel);
             return response.data.data;
         } catch (error) {
-            console.error("Error fetching colors:", error);
-            throw error;
-        }
-    },
-
-    async getSizes() {
-        try {
-            const response = await axios.get(`http://localhost:8080/api/sizes`);
-            return response.data.data;
-        } catch (error) {
-            console.error("Error fetching sizes:", error);
+            console.error("Error generating product details:", error);
             throw error;
         }
     },
 };
 
-export default ProductService;
+export default ProductDetailService;
