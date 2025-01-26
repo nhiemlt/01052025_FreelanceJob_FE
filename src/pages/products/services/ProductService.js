@@ -10,7 +10,8 @@ const ProductService = {
                     keyword,
                 },
             });
-            return response.data;
+            console.log("API response:", response.data); // Log API response
+            return response.data.data.content; // Access the content array
         } catch (error) {
             console.error("Error fetching products:", error);
             throw error;
@@ -63,76 +64,6 @@ const ProductService = {
             return response.data;
         } catch (error) {
             console.error("Error deleting product:", error);
-            throw error;
-        }
-    },
-
-    async getAllBrands() {
-        try {
-            const response = await axios.get(`http://localhost:8080/api/brands`);
-            return response.data;
-        } catch (error) {
-            console.error("Error fetching brands:", error);
-            throw error;
-        }
-    },
-
-    async getAllOrigins() {
-        try {
-            const response = await axios.get(`http://localhost:8080/api/origins`);
-            return response.data;
-        } catch (error) {
-            console.error("Error fetching origins:", error);
-            throw error;
-        }
-    },
-
-    async getAllMaterials() {
-        try {
-            const response = await axios.get(`http://localhost:8080/api/materials`);
-            return response.data;
-        } catch (error) {
-            console.error("Error fetching materials:", error);
-            throw error;
-        }
-    },
-
-    async getAllCollarTypes() {
-        try {
-            const response = await axios.get(`http://localhost:8080/api/collarTypes`);
-            return response.data;
-        } catch (error) {
-            console.error("Error fetching collar types:", error);
-            throw error;
-        }
-    },
-
-    async getAllSleeveTypes() {
-        try {
-            const response = await axios.get(`http://localhost:8080/api/sleeveTypes`);
-            return response.data;
-        } catch (error) {
-            console.error("Error fetching sleeve types:", error);
-            throw error;
-        }
-    },
-
-    async getAllColors() {
-        try {
-            const response = await axios.get(`http://localhost:8080/api/colors`);
-            return response.data;
-        } catch (error) {
-            console.error("Error fetching colors:", error);
-            throw error;
-        }
-    },
-
-    async getAllSizes() {
-        try {
-            const response = await axios.get(`http://localhost:8080/api/sizes`);
-            return response.data;
-        } catch (error) {
-            console.error("Error fetching sizes:", error);
             throw error;
         }
     },

@@ -1,54 +1,29 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { AiOutlineEye, AiFillCaretUp, AiFillCaretDown } from "react-icons/ai";
 import Switch from "react-switch";
+import ProductService from "./services/ProductService";
 
 export default function Product() {
   const [currentProduct, setCurrentProduct] = useState(null);
-  const [items, setItems] = useState([
-    {
-      id: 1,
-      id_danh_muc: 1,
-      ten_san_pham: "Sản phẩm A",
-      ma_san_pham: "SP001",
-      so_luong: 10,
-      trang_thai: 1,
-    },
-    {
-      id: 2,
-      id_danh_muc: 2,
-      ten_san_pham: "Sản phẩm B",
-      ma_san_pham: "SP002",
-      so_luong: 5,
-      trang_thai: 0,
-    },
-    {
-      id: 3,
-      id_danh_muc: 3,
-      ten_san_pham: "Sản phẩm C",
-      ma_san_pham: "SP003",
-      so_luong: 8,
-      trang_thai: 1,
-    },
-    {
-      id: 4,
-      id_danh_muc: 4,
-      ten_san_pham: "Sản phẩm D",
-      ma_san_pham: "SP004",
-      so_luong: 12,
-      trang_thai: 0,
-    },
-    {
-      id: 5,
-      id_danh_muc: 1,
-      ten_san_pham: "Sản phẩm E",
-      ma_san_pham: "SP005",
-      so_luong: 7,
-      trang_thai: 1,
-    },
-  ]);
+  const [items, setItems] = useState([]);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Fetch products from API
+    const fetchProducts = async () => {
+      try {
+        const products = await ProductService.getAllProducts();
+        console.log("Fetched products:", products); // Log fetched products
+        setItems(products); // Set items with the fetched products
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      }
+    };
+
+    fetchProducts();
+  }, []);
 
   const handleSaveProduct = (data) => {
     if (currentProduct) {
@@ -59,14 +34,19 @@ export default function Product() {
     setCurrentProduct(null);
   };
 
-  const handleToggleStatus = (id) => {
-    const updatedItems = items.map((item) =>
-      item.id === id
-        ? { ...item, trang_thai: item.trang_thai === 1 ? 0 : 1 }
-        : item
-    );
-    setItems(updatedItems);
-    console.log("Cập nhật trạng thái sản phẩm với ID:", id);
+  const handleToggleStatus = async (id) => {
+    try {
+      const updatedItems = items.map((item) =>
+        item.id === id
+          ? { ...item, trang_thai: item.trang_thai === 1 ? 0 : 1 }
+          : item
+      );
+      setItems(updatedItems);
+      await ProductService.updateProduct(id, { trang_thai: updatedItems.find(item => item.id === id).trang_thai });
+      console.log("Cập nhật trạng thái sản phẩm với ID:", id);
+    } catch (error) {
+      console.error("Error updating product status:", error);
+    }
   };
 
   const handleSort = (key) => {
@@ -95,14 +75,14 @@ export default function Product() {
     return sortedItems.map((item, index) => (
       <tr key={item.id} className={index % 2 === 0 ? "bg-gray-50" : "bg-white"}>
         <td className="px-4 py-2">{index + 1}</td>
-        <td className="px-4 py-2">{item.ma_san_pham}</td>
-        <td className="px-4 py-2">{item.ten_san_pham}</td>
-        <td className="px-4 py-2">{item.so_luong}</td>
+        <td className="px-4 py-2">{item.maSanPham}</td>
+        <td className="px-4 py-2">{item.tenSanPham}</td>
+        <td className="px-4 py-2">{item.soLuong}</td>
         <td
-          className={`px-4 py-2 ${item.trang_thai === 1 ? "status-active" : "status-inactive"}`}
+          className={`px-4 py-2 ${item.trangThai ? "status-active" : "status-inactive"}`}
         >
           <span className="status-dot"></span>
-          {item.trang_thai === 1 ? " Còn hàng" : " Hết hàng"}
+          {item.trangThai ? " Còn hàng" : " Hết hàng"}
         </td>
         <td className="px-4 py-2 flex justify-center gap-4">
           <button
@@ -113,7 +93,7 @@ export default function Product() {
           </button>
           <Switch
             onChange={() => handleToggleStatus(item.id)}
-            checked={item.trang_thai === 1}
+            checked={item.trangThai}
             offColor="#808080"
             onColor="#00a000"
             uncheckedIcon={false}
@@ -187,10 +167,10 @@ export default function Product() {
         <thead>
           <tr className="bg-gray-100 text-center">
             <th className="px-4 py-2">STT</th>
-            {renderSortableHeader("Mã sản phẩm", "ma_san_pham")}
-            {renderSortableHeader("Tên sản phẩm", "ten_san_pham")}
-            {renderSortableHeader("Số lượng", "so_luong")}
-            {renderSortableHeader("Trạng thái", "trang_thai")}
+            {renderSortableHeader("Mã sản phẩm", "maSanPham")}
+            {renderSortableHeader("Tên sản phẩm", "tenSanPham")}
+            {renderSortableHeader("Số lượng", "soLuong")}
+            {renderSortableHeader("Trạng thái", "trangThai")}
             <th className="px-4 py-2">Hành động</th>
           </tr>
         </thead>

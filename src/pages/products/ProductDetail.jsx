@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Select from "react-select";
 import { AiOutlineSearch, AiOutlineEye } from "react-icons/ai";
 import Switch from "react-switch";
 import { useNavigate } from "react-router-dom";
-import EditProductModal from "./components/EditProductModal"; // Import modal
+import EditProductModal from "./components/EditProductModal";
+import ProductService from "./services/ProductService";
 
 export default function ProductDetail() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -17,79 +18,50 @@ export default function ProductDetail() {
     kichThuocId: [],
   });
 
-  const [products, setProducts] = useState([
-    {
-      id: 1,
-      maSanPham: "SP001",
-      tenSanPham: "Sản phẩm A",
-      thuongHieu: "Apple",
-      xuatXu: "Việt Nam",
-      chatLieu: "Cotton",
-      coAo: "Cổ tròn",
-      tayAo: "Ngắn tay",
-      mauSac: "Đỏ",
-      kichThuoc: "S",
-      gia: 100000,
-      soLuong: 10,
-      trangThai: 1,
-    },
-    {
-      id: 2,
-      maSanPham: "SP002",
-      tenSanPham: "Sản phẩm B",
-      thuongHieu: "Samsung",
-      xuatXu: "Trung Quốc",
-      chatLieu: "Polyester",
-      coAo: "Cổ tim",
-      tayAo: "Dài tay",
-      mauSac: "Xanh",
-      kichThuoc: "M",
-      gia: 200000,
-      soLuong: 5,
-      trangThai: 0,
-    },
-  ]);
+  const [products, setProducts] = useState([]);
+  const [brands, setBrands] = useState([]);
+  const [origins, setOrigins] = useState([]);
+  const [materials, setMaterials] = useState([]);
+  const [collarTypes, setCollarTypes] = useState([]);
+  const [sleeveTypes, setSleeveTypes] = useState([]);
+  const [colors, setColors] = useState([]);
+  const [sizes, setSizes] = useState([]);
 
-  const brands = [
-    { value: 1, label: "Apple" },
-    { value: 2, label: "Samsung" },
-    { value: 3, label: "Sony" },
-  ];
+  const navigate = useNavigate();
 
-  const origins = [
-    { value: 1, label: "Việt Nam" },
-    { value: 2, label: "Trung Quốc" },
-    { value: 3, label: "Mỹ" },
-  ];
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const productResponse = await ProductService.getAllProducts();
+        setProducts(productResponse);
 
-  const materials = [
-    { value: 1, label: "Cotton" },
-    { value: 2, label: "Polyester" },
-    { value: 3, label: "Len" },
-  ];
+        const brandsResponse = await ProductService.getBrands();
+        setBrands(brandsResponse);
 
-  const collarTypes = [
-    { value: 1, label: "Cổ tròn" },
-    { value: 2, label: "Cổ tim" },
-    { value: 3, label: "Cổ bẻ" },
-  ];
+        const originsResponse = await ProductService.getOrigins();
+        setOrigins(originsResponse);
 
-  const sleeveTypes = [
-    { value: 1, label: "Ngắn tay" },
-    { value: 2, label: "Dài tay" },
-  ];
+        const materialsResponse = await ProductService.getMaterials();
+        setMaterials(materialsResponse);
 
-  const colors = [
-    { value: 1, label: "Đỏ" },
-    { value: 2, label: "Xanh" },
-    { value: 3, label: "Vàng" },
-  ];
+        const collarTypesResponse = await ProductService.getCollarTypes();
+        setCollarTypes(collarTypesResponse);
 
-  const sizes = [
-    { value: 1, label: "S" },
-    { value: 2, label: "M" },
-    { value: 3, label: "L" },
-  ];
+        const sleeveTypesResponse = await ProductService.getSleeveTypes();
+        setSleeveTypes(sleeveTypesResponse);
+
+        const colorsResponse = await ProductService.getColors();
+        setColors(colorsResponse);
+
+        const sizesResponse = await ProductService.getSizes();
+        setSizes(sizesResponse);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
@@ -103,14 +75,19 @@ export default function ProductDetail() {
     setFilters({ ...filters, [name]: selectedOptions });
   };
 
-  const handleToggleStatus = (id) => {
-    setProducts((prevProducts) =>
-      prevProducts.map((product) =>
+  const handleToggleStatus = async (id) => {
+    try {
+      const updatedProducts = products.map((product) =>
         product.id === id
           ? { ...product, trangThai: product.trangThai === 1 ? 0 : 1 }
           : product
-      )
-    );
+      );
+      setProducts(updatedProducts);
+      await ProductService.updateProductStatus(id, updatedProducts.find(product => product.id === id).trangThai);
+      console.log("Cập nhật trạng thái sản phẩm với ID:", id);
+    } catch (error) {
+      console.error("Error updating product status:", error);
+    }
   };
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -173,7 +150,7 @@ export default function ProductDetail() {
             name="thuongHieuId"
             value={filters.thuongHieuId}
             onChange={handleFilterChange}
-            options={brands}
+            options={brands.map((brand) => ({ value: brand.id, label: brand.tenThuongHieu }))}
             isClearable
             placeholder="Chọn thương hiệu"
             className="rounded-lg py-2 w-full"
@@ -188,7 +165,7 @@ export default function ProductDetail() {
             name="xuatXuId"
             value={filters.xuatXuId}
             onChange={handleFilterChange}
-            options={origins}
+            options={origins.map((origin) => ({ value: origin.id, label: origin.tenXuatXu }))}
             isClearable
             placeholder="Chọn xuất xứ"
             className="rounded-lg py-2 w-full"
@@ -203,7 +180,7 @@ export default function ProductDetail() {
             name="chatLieuId"
             value={filters.chatLieuId}
             onChange={handleFilterChange}
-            options={materials}
+            options={materials.map((material) => ({ value: material.id, label: material.tenChatLieu }))}
             isClearable
             placeholder="Chọn chất liệu"
             className="rounded-lg py-2 w-full"
@@ -218,7 +195,7 @@ export default function ProductDetail() {
             name="coAoId"
             value={filters.coAoId}
             onChange={handleFilterChange}
-            options={collarTypes}
+            options={collarTypes.map((collar) => ({ value: collar.id, label: collar.tenCoAo }))}
             isClearable
             placeholder="Chọn cổ áo"
             className="rounded-lg py-2 w-full"
@@ -233,7 +210,7 @@ export default function ProductDetail() {
             name="tayAoId"
             value={filters.tayAoId}
             onChange={handleFilterChange}
-            options={sleeveTypes}
+            options={sleeveTypes.map((sleeve) => ({ value: sleeve.id, label: sleeve.tenTayAo }))}
             isClearable
             placeholder="Chọn tay áo"
             className="rounded-lg py-2 w-full"
@@ -248,7 +225,7 @@ export default function ProductDetail() {
             name="mauSacId"
             value={filters.mauSacId}
             onChange={handleMultiFilterChange}
-            options={colors}
+            options={colors.map((color) => ({ value: color.id, label: color.tenMauSac }))}
             isClearable
             isMulti
             placeholder="Chọn màu sắc"
@@ -264,7 +241,7 @@ export default function ProductDetail() {
             name="kichThuocId"
             value={filters.kichThuocId}
             onChange={handleMultiFilterChange}
-            options={sizes}
+            options={sizes.map((size) => ({ value: size.id, label: size.tenKichThuoc }))}
             isClearable
             isMulti
             placeholder="Chọn kích thước"
@@ -306,7 +283,7 @@ export default function ProductDetail() {
                 <td className="px-4 py-3">{product.xuatXu}</td>
                 <td className="px-4 py-3">{product.chatLieu}</td>
                 <td className="px-4 py-3">
-                  {product.gia.toLocaleString()} VND
+                  {(product.gia || 0).toLocaleString()} VND
                 </td>
                 <td className="px-4 py-3">{product.soLuong}</td>
                 <td
@@ -317,7 +294,7 @@ export default function ProductDetail() {
                 </td>
                 <td className="px-4 py-3 flex justify-center gap-4">
                   <button
-                    onClick={() => handleEditProduct(product)}
+                    onClick={() => navigate(`/admin/product/${product.id}`)}
                     className="text-blue-500 hover:text-blue-700 mt-5"
                   >
                     <AiOutlineEye size={20} />
