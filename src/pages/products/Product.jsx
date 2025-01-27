@@ -5,6 +5,7 @@ import { utils, writeFile } from "xlsx";
 import { AiOutlineEye, AiFillCaretUp, AiFillCaretDown, AiOutlineDelete, AiOutlineEdit } from "react-icons/ai";
 import Switch from "react-switch";
 import ProductService from "./services/ProductService";
+import { toast } from "react-toastify";
 
 const Modal = ({ isVisible, onConfirm, onCancel }) => {
   if (!isVisible) return null;
@@ -128,8 +129,8 @@ export default function Product() {
     setSearch(event.target.value);
   };
 
-  const handleViewDetail = (id) => {
-    navigate(`/admin/product/${id}`);
+  const handleViewDetail = (maSanPham) => {
+    navigate(`/admin/product/${maSanPham}`);
   };
 
   const handleUpdateProduct = (product) => {
@@ -150,9 +151,11 @@ export default function Product() {
           item.id === productToUpdate ? { ...item, ...updatedProduct } : item
         );
         setItems(updatedItems);
+        toast.success("Cập nhật sản phẩm thành công!"); 
       }
     } catch (error) {
       console.error("Error updating product:", error);
+      toast.error("Cập nhật sản phẩm thất bại. Vui lòng thử lại!"); 
     } finally {
       setUpdateModal(false);
       setProductToUpdate(null);
@@ -171,8 +174,10 @@ export default function Product() {
         item.id === id ? { ...item, trangThai: !item.trangThai } : item
       );
       setItems(updatedItems);
+      toast.success("Thay đổi trạng thái sản phẩm thành công!"); 
     } catch (error) {
       console.error("Error toggling product status:", error);
+      toast.error("Không thể thay đổi trạng thái sản phẩm. Vui lòng thử lại!"); 
     }
   };
 
@@ -187,9 +192,11 @@ export default function Product() {
         await ProductService.deleteProduct(productToDelete);
         const updatedItems = items.filter((item) => item.id !== productToDelete);
         setItems(updatedItems);
+        toast.success("Xóa sản phẩm thành công!"); 
       }
     } catch (error) {
       console.error("Error deleting product:", error);
+      toast.error("Không thể xóa sản phẩm. Vui lòng thử lại!"); 
     } finally {
       setShowModal(false);
       setProductToDelete(null);
@@ -227,7 +234,7 @@ export default function Product() {
           {item.trangThai ? " Còn hàng" : " Hết hàng"}
         </td>
         <td className="px-4 py-2 flex justify-center gap-4">
-          <button className="text-blue-500 hover:text-blue-600" onClick={() => handleViewDetail(item.id)}>
+          <button className="text-blue-500 hover:text-blue-600" onClick={() => handleViewDetail(item.maSanPham)}>
             <AiOutlineEye size={20} />
           </button>
           <button className="text-yellow-500 hover:text-yellow-600" onClick={() => handleUpdateProduct(item)}>
@@ -247,6 +254,8 @@ export default function Product() {
             onColor="#00a000"
             uncheckedIcon={false}
             checkedIcon={false}
+            height={20}
+            width={40}
           />
         </td>
       </tr>
@@ -359,7 +368,7 @@ export default function Product() {
 
         <div className="flex items-center gap-2">
           <button
-            className="px-3 py-1 border rounded-lg text-gray-500 hover:bg-gray-100"
+            className="rounded-lg py-1.5 text-sm w-full border-2 border-orange-500 focus:ring-2 focus:ring-orange-500"
             onClick={() => setCurrentPage(currentPage - 1)}
             disabled={currentPage === 0}
           >
@@ -367,7 +376,7 @@ export default function Product() {
           </button>
           <span className="text-sm text-gray-700">{currentPage + 1}</span>
           <button
-            className="px-3 py-1 border rounded-lg text-gray-500 hover:bg-gray-100"
+            className="rounded-lg py-1.5 text-sm w-full border-2 border-orange-500 focus:ring-2 focus:ring-orange-500"
             onClick={() => setCurrentPage(currentPage + 1)}
           >
             {">"}
