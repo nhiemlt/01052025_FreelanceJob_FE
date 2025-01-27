@@ -60,8 +60,10 @@ export default function ProductDetail() {
   }, [maSanPham]);
 
   useEffect(() => {
-    fetchProductDetails();
-  }, [page, pageSize, search, sortConfig, filters]);
+    if (search) {
+      fetchProductDetails();
+    }
+  }, [search, page, pageSize, sortConfig, filters]);
 
   const fetchSelectOptions = async () => {
     try {
