@@ -231,7 +231,7 @@ export default function Product() {
         </td>
         <td className={`px-4 py-2 ${item.trangThai ? "status-active" : "status-inactive"}`}>
           <span className="status-dot"></span>
-          {item.trangThai ? " Còn hàng" : " Hết hàng"}
+          {item.trangThai ? " Kích hoạt" : " Ngừng bán"}
         </td>
         <td className="px-4 py-2 flex justify-center gap-4">
           <button className="text-blue-500 hover:text-blue-600" onClick={() => handleViewDetail(item.maSanPham)}>
