@@ -72,10 +72,17 @@ const ProductDetailService = {
             const response = await axios.post(`http://localhost:8080/api/san-pham-chi-tiet/generate`, generateModel);
             return response.data.data;
         } catch (error) {
-            console.error("Error generating product details:", error);
+            if (error.response) {
+                console.error("Error response from server:", error.response.data);
+            } else if (error.request) {
+                console.error("No response received:", error.request);
+            } else {
+                console.error("Error message:", error.message);
+            }
             throw error;
         }
-    },
+    }
+    
 };
 
 export default ProductDetailService;
