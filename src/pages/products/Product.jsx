@@ -1,53 +1,60 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { AiOutlineEye, AiFillCaretUp, AiFillCaretDown } from "react-icons/ai";
+import { format } from "date-fns";
+import { utils, writeFile } from "xlsx";
+import { AiOutlineEye, AiFillCaretUp, AiFillCaretDown, AiOutlineDelete } from "react-icons/ai";
 import Switch from "react-switch";
 import ProductService from "./services/ProductService";
 
+const Modal = ({ isVisible, onConfirm, onCancel }) => {
+  if (!isVisible) return null;
+
+  return (
+    <div className="fixed inset-0 bg-gray-500 bg-opacity-50 flex justify-center items-center z-50">
+      <div className="bg-white rounded-lg shadow p-6 w-96">
+        <h2 className="text-xl mb-4">Xác nhận xóa sản phẩm</h2>
+        <p className="mb-4">Bạn có chắc chắn muốn xóa sản phẩm này không?</p>
+        <div className="flex justify-end gap-4">
+          <button
+            className="bg-gray-300 px-4 py-2 rounded-lg hover:bg-gray-400"
+            onClick={onCancel}
+          >
+            Hủy
+          </button>
+          <button
+            className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600"
+            onClick={onConfirm}
+          >
+            Xóa
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export default function Product() {
-  const [currentProduct, setCurrentProduct] = useState(null);
   const [items, setItems] = useState([]);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
+  const [search, setSearch] = useState("");
   const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
+  const [showModal, setShowModal] = useState(false);
+  const [productToDelete, setProductToDelete] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Fetch products from API
     const fetchProducts = async () => {
       try {
-        const products = await ProductService.getAllProducts();
-        console.log("Fetched products:", products); // Log fetched products
-        setItems(products); // Set items with the fetched products
+        const products = await ProductService.getAllProducts(currentPage, pageSize, search);
+        setItems(products);
       } catch (error) {
         console.error("Error fetching products:", error);
       }
     };
 
     fetchProducts();
-  }, []);
-
-  const handleSaveProduct = (data) => {
-    if (currentProduct) {
-      console.log("Cập nhật sản phẩm:", { ...currentProduct, ...data });
-    } else {
-      console.log("Thêm sản phẩm mới:", data);
-    }
-    setCurrentProduct(null);
-  };
-
-  const handleToggleStatus = async (id) => {
-    try {
-      const updatedItems = items.map((item) =>
-        item.id === id
-          ? { ...item, trang_thai: item.trang_thai === 1 ? 0 : 1 }
-          : item
-      );
-      setItems(updatedItems);
-      await ProductService.updateProduct(id, { trang_thai: updatedItems.find(item => item.id === id).trang_thai });
-      console.log("Cập nhật trạng thái sản phẩm với ID:", id);
-    } catch (error) {
-      console.error("Error updating product status:", error);
-    }
-  };
+  }, [currentPage, pageSize, search, sortConfig]);
 
   const handleSort = (key) => {
     let direction = "asc";
@@ -57,38 +64,78 @@ export default function Product() {
     setSortConfig({ key, direction });
   };
 
-  const sortedItems = [...items].sort((a, b) => {
-    if (a[sortConfig.key] < b[sortConfig.key]) {
-      return sortConfig.direction === "asc" ? -1 : 1;
-    }
-    if (a[sortConfig.key] > b[sortConfig.key]) {
-      return sortConfig.direction === "asc" ? 1 : -1;
-    }
-    return 0;
-  });
+  const handleSearch = (event) => {
+    setSearch(event.target.value);
+  };
 
   const handleViewDetail = (id) => {
     navigate(`/admin/product/${id}`);
   };
 
+  const handleToggleStatus = async (id) => {
+    try {
+      await ProductService.toggleProductStatus(id);
+      const updatedItems = items.map((item) =>
+        item.id === id ? { ...item, trangThai: !item.trangThai } : item
+      );
+      setItems(updatedItems);
+    } catch (error) {
+      console.error("Error toggling product status:", error);
+    }
+  };
+
+  const handleDeleteProduct = (id) => {
+    setProductToDelete(id);
+    setShowModal(true);
+  };
+
+  const confirmDelete = async () => {
+    try {
+      if (productToDelete) {
+        await ProductService.deleteProduct(productToDelete);
+        const updatedItems = items.filter((item) => item.id !== productToDelete);
+        setItems(updatedItems);
+      }
+    } catch (error) {
+      console.error("Error deleting product:", error);
+    } finally {
+      setShowModal(false);
+      setProductToDelete(null);
+    }
+  };
+
+  const cancelDelete = () => {
+    setShowModal(false);
+    setProductToDelete(null);
+  };
+
   const renderRows = () => {
+    const sortedItems = [...items].sort((a, b) => {
+      if (sortConfig.key === null) return 0;
+
+      const aValue = a[sortConfig.key];
+      const bValue = b[sortConfig.key];
+
+      if (aValue < bValue) return sortConfig.direction === "asc" ? -1 : 1;
+      if (aValue > bValue) return sortConfig.direction === "asc" ? 1 : -1;
+      return 0;
+    });
+
     return sortedItems.map((item, index) => (
       <tr key={item.id} className={index % 2 === 0 ? "bg-gray-50" : "bg-white"}>
         <td className="px-4 py-2">{index + 1}</td>
         <td className="px-4 py-2">{item.maSanPham}</td>
         <td className="px-4 py-2">{item.tenSanPham}</td>
         <td className="px-4 py-2">{item.soLuong}</td>
-        <td
-          className={`px-4 py-2 ${item.trangThai ? "status-active" : "status-inactive"}`}
-        >
+        <td className="px-4 py-2">
+          {format(new Date(item.ngayTao), "HH:mm:ss dd/MM/yyyy")}
+        </td>
+        <td className={`px-4 py-2 ${item.trangThai ? "status-active" : "status-inactive"}`}>
           <span className="status-dot"></span>
           {item.trangThai ? " Còn hàng" : " Hết hàng"}
         </td>
         <td className="px-4 py-2 flex justify-center gap-4">
-          <button
-            className="text-blue-500 hover:text-blue-600"
-            onClick={() => handleViewDetail(item.id)}
-          >
+          <button className="text-blue-500 hover:text-blue-600" onClick={() => handleViewDetail(item.id)}>
             <AiOutlineEye size={20} />
           </button>
           <Switch
@@ -99,6 +146,12 @@ export default function Product() {
             uncheckedIcon={false}
             checkedIcon={false}
           />
+          <button
+            className="text-red-500 hover:text-red-600"
+            onClick={() => handleDeleteProduct(item.id)}
+          >
+            <AiOutlineDelete size={20} />
+          </button>
         </td>
       </tr>
     ));
@@ -117,23 +170,32 @@ export default function Product() {
           {label}
           <div className="ml-2 flex flex-col">
             <AiFillCaretUp
-              className={`text-sm ${
-                isSorted && isAscending
-                  ? "text-orange-500"
-                  : "text-gray-400 hover:text-gray-600"
-              }`}
+              className={`text-sm ${isSorted && isAscending ? "text-orange-500" : "text-gray-400 hover:text-gray-600"}`}
             />
             <AiFillCaretDown
-              className={`text-sm ${
-                isSorted && !isAscending
-                  ? "text-orange-500"
-                  : "text-gray-400 hover:text-gray-600"
-              }`}
+              className={`text-sm ${isSorted && !isAscending ? "text-orange-500" : "text-gray-400 hover:text-gray-600"}`}
             />
           </div>
         </div>
       </th>
     );
+  };
+
+
+  const exportToExcel = () => {
+    const dataToExport = items.map(item => ({
+      "Mã sản phẩm": item.maSanPham,
+      "Tên sản phẩm": item.tenSanPham,
+      "Số lượng": item.soLuong,
+      "Ngày tạo": format(new Date(item.ngayTao), "HH:mm:ss dd/MM/yyyy"),
+      "Trạng thái": item.trangThai ? "Còn hàng" : "Hết hàng",
+    }));
+
+    const ws = utils.json_to_sheet(dataToExport);
+
+    const wb = utils.book_new();
+    utils.book_append_sheet(wb, ws, "Sản phẩm");
+    writeFile(wb, "san_pham.xlsx");
   };
 
   return (
@@ -146,13 +208,19 @@ export default function Product() {
             type="text"
             placeholder="Tìm theo mã, tên sản phẩm"
             className="border rounded-lg px-4 py-2 w-64 focus:outline-none focus:ring-2 focus:ring-orange-500"
+            value={search}
+            onChange={handleSearch}
           />
         </div>
 
         <div className="flex gap-2">
-          <button className="bg-orange-500 text-white px-4 py-2 rounded-lg shadow hover:bg-orange-600">
+          <button
+            className="bg-orange-500 text-white px-4 py-2 rounded-lg shadow hover:bg-orange-600"
+            onClick={exportToExcel}
+          >
             Export Excel
           </button>
+
           <button
             className="bg-orange-500 text-white px-4 py-2 rounded-lg shadow hover:bg-orange-600"
             onClick={() => navigate("/admin/product/new")}
@@ -162,7 +230,6 @@ export default function Product() {
         </div>
       </div>
 
-      {/* Bảng dữ liệu */}
       <table className="table-auto w-full bg-white rounded-lg shadow overflow-hidden text-center">
         <thead>
           <tr className="bg-gray-100 text-center">
@@ -170,6 +237,7 @@ export default function Product() {
             {renderSortableHeader("Mã sản phẩm", "maSanPham")}
             {renderSortableHeader("Tên sản phẩm", "tenSanPham")}
             {renderSortableHeader("Số lượng", "soLuong")}
+            {renderSortableHeader("Ngày tạo", "ngayTao")}
             {renderSortableHeader("Trạng thái", "trangThai")}
             <th className="px-4 py-2">Hành động</th>
           </tr>
@@ -177,15 +245,14 @@ export default function Product() {
         <tbody>{renderRows()}</tbody>
       </table>
 
-      {/* Phân trang */}
       <div className="flex items-center justify-between mt-4">
         <div className="flex items-center gap-2">
-          <label htmlFor="entries" className="text-sm text-gray-700">
-            Xem
-          </label>
+          <label htmlFor="entries" className="text-sm text-gray-700">Xem</label>
           <select
             id="entries"
             className="border rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-orange-500"
+            value={pageSize}
+            onChange={(e) => setPageSize(e.target.value)}
           >
             <option value="5">5</option>
             <option value="10">10</option>
@@ -195,37 +262,28 @@ export default function Product() {
         </div>
 
         <div className="flex items-center gap-2">
-          <button className="px-3 py-1 border rounded-lg text-gray-500 hover:bg-gray-100">
+          <button
+            className="px-3 py-1 border rounded-lg text-gray-500 hover:bg-gray-100"
+            onClick={() => setCurrentPage(currentPage - 1)}
+            disabled={currentPage === 0}
+          >
             {"<"}
           </button>
-          <span className="text-sm text-gray-700">1</span>
-          <button className="px-3 py-1 border rounded-lg text-gray-500 hover:bg-gray-100">
+          <span className="text-sm text-gray-700">{currentPage + 1}</span>
+          <button
+            className="px-3 py-1 border rounded-lg text-gray-500 hover:bg-gray-100"
+            onClick={() => setCurrentPage(currentPage + 1)}
+          >
             {">"}
           </button>
         </div>
       </div>
 
-      <style>{`
-        .status-dot {
-          display: inline-block;
-          width: 8px;
-          height: 8px;
-          border-radius: 50%;
-          margin-right: 4px;
-        }
-        .status-active .status-dot {
-          background-color: #00a000;
-        }
-        .status-inactive .status-dot {
-          background-color: #808080;
-        }
-        .status-active {
-          color: #00a000;
-        }
-        .status-inactive {
-          color: #808080;
-        }
-      `}</style>
+      <Modal
+        isVisible={showModal}
+        onConfirm={confirmDelete}
+        onCancel={cancelDelete}
+      />
     </div>
   );
 }

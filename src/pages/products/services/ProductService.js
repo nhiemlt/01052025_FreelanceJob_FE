@@ -1,13 +1,13 @@
 import axios from "axios";
 
 const ProductService = {
-    async getAllProducts(page = 0, size = 10, keyword = '') {
+    async getAllProducts(page = 0, size = 10, search = '') {
         try {
             const response = await axios.get(`http://localhost:8080/api/san-pham`, {
                 params: {
                     page,
                     size,
-                    keyword,
+                    search,
                 },
             });
             console.log("API response:", response.data); // Log API response
@@ -19,6 +19,16 @@ const ProductService = {
     },
 
     async getProductById(id) {
+        try {
+            const response = await axios.get(`http://localhost:8080/api/san-pham/${id}`);
+            return response.data;
+        } catch (error) {
+            console.error("Error fetching product data:", error);
+            throw error;
+        }
+    },
+
+    async getDetailByProductId(id) {
         try {
             const response = await axios.get(`http://localhost:8080/api/san-pham/${id}`);
             return response.data;
