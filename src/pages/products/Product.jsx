@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import { utils, writeFile } from "xlsx";
-import { AiOutlineEye, AiFillCaretUp, AiFillCaretDown, AiOutlineDelete } from "react-icons/ai";
+import { AiOutlineEye, AiFillCaretUp, AiFillCaretDown, AiOutlineDelete, AiOutlineEdit } from "react-icons/ai";
 import Switch from "react-switch";
 import ProductService from "./services/ProductService";
 
@@ -33,6 +33,59 @@ const Modal = ({ isVisible, onConfirm, onCancel }) => {
   );
 };
 
+const UpdateModal = ({ isVisible, onConfirm, onCancel, product, updatedProduct, setUpdatedProduct }) => {
+  if (!isVisible) return null;
+
+  return (
+    <div className="fixed inset-0 bg-gray-500 bg-opacity-50 flex justify-center items-center z-50">
+      <div className="bg-white rounded-lg shadow p-6 w-96">
+        <h2 className="text-xl mb-4">Cập nhật sản phẩm</h2>
+        <div className="mb-4">
+          <label className="block mb-2">Mã sản phẩm</label>
+          <input
+            type="text"
+            className="border rounded-lg px-4 py-2 w-full"
+            value={updatedProduct.maSanPham}
+            onChange={(e) => setUpdatedProduct({ ...updatedProduct, maSanPham: e.target.value })}
+          />
+        </div>
+        <div className="mb-4">
+          <label className="block mb-2">Tên sản phẩm</label>
+          <input
+            type="text"
+            className="border rounded-lg px-4 py-2 w-full"
+            value={updatedProduct.tenSanPham}
+            onChange={(e) => setUpdatedProduct({ ...updatedProduct, tenSanPham: e.target.value })}
+          />
+        </div>
+        <div className="mb-4">
+          <label className="block mb-2">Mô tả</label>
+          <textarea
+            className="border rounded-lg px-4 py-2 w-full"
+            value={updatedProduct.moTa}
+            onChange={(e) => setUpdatedProduct({ ...updatedProduct, moTa: e.target.value })}
+          />
+        </div>
+        <div className="flex justify-end gap-4">
+          <button
+            className="bg-gray-300 px-4 py-2 rounded-lg hover:bg-gray-400"
+            onClick={onCancel}
+          >
+            Hủy
+          </button>
+          <button
+            className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600"
+            onClick={() => onConfirm(updatedProduct)}
+          >
+            Cập nhật
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
 export default function Product() {
   const [items, setItems] = useState([]);
   const [currentPage, setCurrentPage] = useState(0);
@@ -41,6 +94,13 @@ export default function Product() {
   const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
   const [showModal, setShowModal] = useState(false);
   const [productToDelete, setProductToDelete] = useState(null);
+  const [updateModal, setUpdateModal] = useState(false);
+  const [productToUpdate, setProductToUpdate] = useState(null);
+  const [updatedProduct, setUpdatedProduct] = useState({
+    maSanPham: '',
+    tenSanPham: '',
+    moTa: ''
+  });
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -70,6 +130,38 @@ export default function Product() {
 
   const handleViewDetail = (id) => {
     navigate(`/admin/product/${id}`);
+  };
+
+  const handleUpdateProduct = (product) => {
+    setUpdatedProduct({
+      maSanPham: product.maSanPham,
+      tenSanPham: product.tenSanPham,
+      moTa: product.moTa,
+    });
+    setProductToUpdate(product.id);
+    setUpdateModal(true);
+  };
+
+  const confirmUpdate = async (updatedProduct) => {
+    try {
+      if (productToUpdate) {
+        await ProductService.updateProduct(productToUpdate, updatedProduct);
+        const updatedItems = items.map((item) =>
+          item.id === productToUpdate ? { ...item, ...updatedProduct } : item
+        );
+        setItems(updatedItems);
+      }
+    } catch (error) {
+      console.error("Error updating product:", error);
+    } finally {
+      setUpdateModal(false);
+      setProductToUpdate(null);
+    }
+  };
+
+  const cancelUpdate = () => {
+    setUpdateModal(false);
+    setProductToUpdate(null);
   };
 
   const handleToggleStatus = async (id) => {
@@ -138,6 +230,16 @@ export default function Product() {
           <button className="text-blue-500 hover:text-blue-600" onClick={() => handleViewDetail(item.id)}>
             <AiOutlineEye size={20} />
           </button>
+          <button className="text-yellow-500 hover:text-yellow-600" onClick={() => handleUpdateProduct(item)}>
+            <AiOutlineEdit size={20} />
+          </button>
+          <button
+            className="text-red-500 hover:text-red-600"
+            onClick={() => handleDeleteProduct(item.id)}
+          >
+            <AiOutlineDelete size={20} />
+          </button>
+          
           <Switch
             onChange={() => handleToggleStatus(item.id)}
             checked={item.trangThai}
@@ -146,12 +248,6 @@ export default function Product() {
             uncheckedIcon={false}
             checkedIcon={false}
           />
-          <button
-            className="text-red-500 hover:text-red-600"
-            onClick={() => handleDeleteProduct(item.id)}
-          >
-            <AiOutlineDelete size={20} />
-          </button>
         </td>
       </tr>
     ));
@@ -279,11 +375,10 @@ export default function Product() {
         </div>
       </div>
 
-      <Modal
-        isVisible={showModal}
-        onConfirm={confirmDelete}
-        onCancel={cancelDelete}
-      />
+      <Modal isVisible={showModal} onConfirm={confirmDelete} onCancel={cancelDelete} />
+
+      <UpdateModal isVisible={updateModal} onConfirm={confirmUpdate} onCancel={cancelUpdate} updatedProduct={updatedProduct} setUpdatedProduct={setUpdatedProduct} />
+
     </div>
   );
 }
