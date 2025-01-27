@@ -368,7 +368,7 @@ export default function Product() {
 
         <div className="flex items-center gap-2">
           <button
-            className="rounded-lg py-1.5 text-sm w-full border-2 border-orange-500 focus:ring-2 focus:ring-orange-500"
+            className="px-3 py-1 border rounded-lg text-gray-500 hover:bg-orange-500 hover:text-white"
             onClick={() => setCurrentPage(currentPage - 1)}
             disabled={currentPage === 0}
           >
@@ -376,7 +376,7 @@ export default function Product() {
           </button>
           <span className="text-sm text-gray-700">{currentPage + 1}</span>
           <button
-            className="rounded-lg py-1.5 text-sm w-full border-2 border-orange-500 focus:ring-2 focus:ring-orange-500"
+            className="px-3 py-1 border rounded-lg text-gray-500 hover:bg-orange-500 hover:text-white"
             onClick={() => setCurrentPage(currentPage + 1)}
           >
             {">"}
