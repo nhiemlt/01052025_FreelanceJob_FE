@@ -9,6 +9,52 @@ import ProductService from "./services/ProductService";
 import ProductDetailService from "./services/ProductDetailService";
 
 export default function AddProduct() {
+  const navigate = useNavigate();
+
+  const [sanPhams, setSanPhams] = useState([]);
+  const [chatLieus, setChatLieus] = useState([]);
+  const [coAos, setCoAos] = useState([]);
+  const [kichThuocs, setKichThuocs] = useState([]);
+  const [mauSacs, setMauSacs] = useState([]);
+  const [tayAos, setTayAos] = useState([]);
+  const [thuongHieus, setThuongHieus] = useState([]);
+  const [xuatXus, setXuatXus] = useState([]);
+
+
+  useEffect(() => {
+    fetchSelectOptions();
+  }, []);
+
+  const fetchSelectOptions = async () => {
+    try {
+      const sanPhamdata = await ProductDetailService.getSanPham();
+      setSanPhams(sanPhamdata);
+
+      const chatLieuData = await ProductDetailService.getChatLieu();
+      setChatLieus(chatLieuData);
+
+      const coAoData = await ProductDetailService.getCoAo();
+      setCoAos(coAoData);
+
+      const kichThuocData = await ProductDetailService.getKichThuoc();
+      setKichThuocs(kichThuocData);
+
+      const mauSacData = await ProductDetailService.getMauSac();
+      setMauSacs(mauSacData);
+
+      const tayAoData = await ProductDetailService.getTayAo();
+      setTayAos(tayAoData);
+
+      const thuongHieuData = await ProductDetailService.getThuongHieu();
+      setThuongHieus(thuongHieuData);
+
+      const xuatXuData = await ProductDetailService.getXuatXu();
+      setXuatXus(xuatXuData);
+    } catch (error) {
+      setError("Error fetching select options");
+    }
+  };
+
   const [formData, setFormData] = useState({
     tenSanPham: "",
     trangThai: "",
@@ -22,200 +68,150 @@ export default function AddProduct() {
     variants: [],
   });
 
-  const [isNameModalOpen, setIsNameModalOpen] = useState(false);
-  const [isAttributeModalOpen, setIsAttributeModalOpen] = useState(false);
-  const [modalAttribute, setModalAttribute] = useState("");
-  const [existingProducts, setExistingProducts] = useState([]);
-  const [attributes, setAttributes] = useState({
-    brands: [],
-    origins: [],
-    materials: [],
-    collarTypes: [],
-    sleeveTypes: [],
-    colors: [],
-    sizes: [],
+  const [modals, setModals] = useState({
+    isNameModalOpen: false,
+    isAttributeModalOpen: false,
+    modalAttribute: "",
   });
 
-  const navigate = useNavigate();
 
-  // Fetch data from ProductDetailService
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const productDetails = await ProductDetailService.getAllProductDetails();
 
-        // Map attribute data
-        const mapAttribute = (key, labelKey) =>
-          productDetails.map((detail) => ({
-            value: detail[key]?.id,
-            label: detail[key]?.[labelKey],
-          }));
-
-        setAttributes({
-          brands: mapAttribute("thuongHieu", "tenThuongHieu"),
-          origins: mapAttribute("xuatXu", "tenXuatXu"),
-          materials: mapAttribute("chatLieu", "tenChatLieu"),
-          collarTypes: mapAttribute("coAo", "tenCoAo"),
-          sleeveTypes: mapAttribute("tayAo", "tenTayAo"),
-          colors: mapAttribute("mauSac", "tenMauSac"),
-          sizes: mapAttribute("kichThuoc", "tenKichThuoc"),
-        });
-
-        const productsData = mapAttribute("sanPham", "tenSanPham");
-        setExistingProducts(productsData);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  // Handle changes to form fields
-  const handleChange = (selectedOptions, { name }) => {
-    setFormData({
-      ...formData,
-      [name]: selectedOptions ? selectedOptions.map((option) => option.value) : [],
-    });
-  };
-
-  const handleProductNameChange = (selectedOption) => {
-    const value = selectedOption ? selectedOption.value : "";
-    setFormData({ ...formData, tenSanPham: value });
-
-    if (!existingProducts.some((product) => product.value === value)) {
-      setIsNameModalOpen(true);
-    }
-  };
-
-  // Save new product to the list
   const handleSaveNewProduct = (newProduct) => {
-    setExistingProducts([...existingProducts, newProduct]);
-    setFormData({ ...formData, tenSanPham: newProduct.value });
-    setIsNameModalOpen(false);
+    setExistingProducts((prev) => [...prev, newProduct]);
+    setFormData((prev) => ({ ...prev, tenSanPham: newProduct.value }));
+    setModals((prev) => ({ ...prev, isNameModalOpen: false }));
   };
 
-  const handleSaveNewAttribute = (newAttribute) => {
-    setIsAttributeModalOpen(false);
+  const handleSaveNewAttribute = () => {
+    setModals((prev) => ({ ...prev, isAttributeModalOpen: false }));
   };
 
   const handleOpenModal = (attribute) => {
-    setModalAttribute(attribute);
-    setIsAttributeModalOpen(true);
+    setModals({ isAttributeModalOpen: true, modalAttribute: attribute });
   };
 
   const handleVariantsChange = (newVariants) => {
-    setFormData({ ...formData, variants: newVariants });
+    setFormData((prev) => ({ ...prev, variants: newVariants }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       await ProductService.createProduct(formData);
-      console.log("Lưu sản phẩm:", formData);
       navigate("/admin/product");
     } catch (error) {
       console.error("Error saving product:", error);
     }
   };
 
-  const allAttributesSelected =
-    formData.thuongHieuId.length > 0 &&
-    formData.xuatXuId.length > 0 &&
-    formData.chatLieuId.length > 0 &&
-    formData.coAoId.length > 0 &&
-    formData.tayAoId.length > 0 &&
-    formData.mauSacId.length > 0 &&
-    formData.kichThuocId.length > 0;
+  const allAttributesSelected = Object.values(formData).every(
+    (field) => Array.isArray(field) && field.length > 0
+  );
 
   return (
     <div className="bg-gray-50 min-h-screen">
       <form onSubmit={handleSubmit}>
         <div className="grid grid-cols-5 gap-4">
-          {/* Left Section */}
           <div className="col-span-2 mt-6 p-4 border rounded-lg bg-white">
             <h2 className="text-lg font-semibold mb-4">Thuộc tính sản phẩm</h2>
 
-            {/* Tên sản phẩm */}
             <div>
               <label className="block text-sm font-medium">Tên sản phẩm</label>
               <CreatableSelect
                 name="tenSanPham"
-                value={existingProducts.find(
-                  (product) => product.value === formData.tenSanPham
-                )}
-                onChange={handleProductNameChange}
-                options={existingProducts}
-                className="rounded-lg py-2 w-full"
+                options={sanPhams.map(sanPham => ({ value: sanPham.value, label: sanPham.label }))}
+                value={sanPhams.find(sanPham => sanPham.value === formData.tenSanPham) || null}
                 isClearable
+                className="rounded-lg py-1.5 text-sm w-full"
               />
             </div>
 
-            {/* Thuộc tính */}
             <div className="mt-6 grid grid-cols-2 gap-4">
-              {[
-                { label: "Thương hiệu", data: attributes.brands, key: "thuongHieuId" },
-                { label: "Xuất xứ", data: attributes.origins, key: "xuatXuId" },
-                { label: "Chất liệu", data: attributes.materials, key: "chatLieuId" },
-                { label: "Cổ áo", data: attributes.collarTypes, key: "coAoId" },
-                { label: "Tay áo", data: attributes.sleeveTypes, key: "tayAoId" },
-                { label: "Màu sắc", data: attributes.colors, key: "mauSacId" },
-                { label: "Kích thước", data: attributes.sizes, key: "kichThuocId" },
-              ].map(({ label, data, key }) => (
-                <div key={key}>
-                  <label className="block text-sm font-medium">{label}</label>
-                  <CreatableSelect
-                    name={key}
-                    value={data.filter((item) =>
-                      formData[key].includes(item.value)
-                    )}
-                    onChange={handleChange}
-                    options={data}
-                    className="rounded-lg py-2 w-full"
-                    onCreateOption={() => handleOpenModal(label.toLowerCase())}
-                    isClearable
-                    isMulti
-                  />
-                </div>
-              ))}
+
+
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Thương hiệu</label>
+                <Select
+                  name="thuongHieuId"
+                  options={thuongHieus.map(th => ({ value: th.id, label: th.tenThuongHieu }))}
+                  isMulti
+                  className="rounded-lg py-1.5 text-sm w-full"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Xuất xứ</label>
+                <Select
+                  name="xuatXuId"
+                  options={xuatXus.map(x => ({ value: x.id, label: x.tenXuatXu }))}
+                  isMulti
+                  className="rounded-lg py-1.5 text-sm w-full"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Chất liệu</label>
+                <Select
+                  name="chatLieuId"
+                  options={chatLieus.map(c => ({ value: c.id, label: c.tenChatLieu }))}
+                  isMulti
+                  className="rounded-lg py-1.5 text-sm w-full"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Cổ áo</label>
+                <Select
+                  name="coAoId"
+                  options={coAos.map(c => ({ value: c.id, label: c.tenCoAo }))}
+                  isMulti
+                  className="rounded-lg py-1.5 text-sm w-full"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Tay áo</label>
+                <Select
+                  name="tayAoId"
+                  options={tayAos.map(t => ({ value: t.id, label: t.tenTayAo }))}
+                  isMulti
+                  className="rounded-lg py-1.5 text-sm w-full"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Màu sắc</label>
+                <Select
+                  name="mauSacId"
+                  options={mauSacs.map(m => ({ value: m.id, label: m.tenMauSac }))}
+                  isMulti
+                  className="rounded-lg py-1.5 text-sm w-full"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Kích thước</label>
+                <Select
+                  name="kichThuocId"
+                  options={kichThuocs.map(k => ({ value: k.id, label: k.tenKichThuoc }))}
+                  isMulti
+                  className="rounded-lg py-1.5 text-sm w-full"
+                />
+              </div>
             </div>
           </div>
 
-          {/* Right Section */}
           {allAttributesSelected && (
             <div className="col-span-3 mt-6 p-4 border rounded-lg bg-white">
               <h2 className="text-lg font-semibold mb-4">Biến thể sản phẩm</h2>
               <ProductVariants
-                attributes={{
-                  colors: attributes.colors.filter((color) =>
-                    formData.mauSacId.includes(color.value)
-                  ),
-                  sizes: attributes.sizes.filter((size) =>
-                    formData.kichThuocId.includes(size.value)
-                  ),
-                  brands: attributes.brands.filter((brand) =>
-                    formData.thuongHieuId.includes(brand.value)
-                  ),
-                  origins: attributes.origins.filter((origin) =>
-                    formData.xuatXuId.includes(origin.value)
-                  ),
-                  materials: attributes.materials.filter((material) =>
-                    formData.chatLieuId.includes(material.value)
-                  ),
-                  collarTypes: attributes.collarTypes.filter((collar) =>
-                    formData.coAoId.includes(collar.value)
-                  ),
-                  sleeveTypes: attributes.sleeveTypes.filter((sleeve) =>
-                    formData.tayAoId.includes(sleeve.value)
-                  ),
-                }}
+                attributes={attributes}
                 onVariantsChange={handleVariantsChange}
               />
             </div>
           )}
         </div>
 
-        {/* Buttons */}
         <div className="mt-4 flex justify-end gap-2">
           <button
             type="button"
@@ -233,17 +229,17 @@ export default function AddProduct() {
         </div>
       </form>
 
-      {/* Modals */}
       <NameModal
-        isOpen={isNameModalOpen}
-        onClose={() => setIsNameModalOpen(false)}
+        isOpen={modals.isNameModalOpen}
+        onClose={() => setModals((prev) => ({ ...prev, isNameModalOpen: false }))}
         onSave={handleSaveNewProduct}
       />
+
       <AttributeModal
-        isOpen={isAttributeModalOpen}
-        onClose={() => setIsAttributeModalOpen(false)}
+        isOpen={modals.isAttributeModalOpen}
+        onClose={() => setModals((prev) => ({ ...prev, isAttributeModalOpen: false }))}
         onSave={handleSaveNewAttribute}
-        attributeName={modalAttribute}
+        attributeName={modals.modalAttribute}
       />
     </div>
   );

@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from "react";
 import Select from "react-select";
-import { AiOutlineSearch, AiFillCaretUp, AiFillCaretDown, AiOutlineEdit, AiOutlineDelete } from "react-icons/ai";
-import { useNavigate, useParams } from "react-router-dom";
+import { AiOutlineSearch, AiOutlineEdit, AiOutlineDelete } from "react-icons/ai";
+import {useParams } from "react-router-dom";
 import ProductDetailService from "./services/ProductDetailService";
 import Switch from "react-switch";
 import { toast } from "react-toastify";
 
 export default function ProductDetail() {
-  const navigate = useNavigate();
   const { maSanPham } = useParams();
 
   const [sanPhams, setSanPhams] = useState([]);
