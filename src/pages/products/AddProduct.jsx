@@ -1,16 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { FaLightbulb } from "react-icons/fa";
 import Select from "react-select";
 import CreatableSelect from "react-select/creatable";
-import NameModal from "./components/NameModal";
-import AttributeModal from "./components/AttributeModal";
 import ProductVariants from "./components/ProductVariants";
-import ProductService from "./services/ProductService";
 import ProductDetailService from "./services/ProductDetailService";
 
 export default function AddProduct() {
-  const navigate = useNavigate();
-
   const [sanPhams, setSanPhams] = useState([]);
   const [chatLieus, setChatLieus] = useState([]);
   const [coAos, setCoAos] = useState([]);
@@ -20,6 +15,16 @@ export default function AddProduct() {
   const [thuongHieus, setThuongHieus] = useState([]);
   const [xuatXus, setXuatXus] = useState([]);
 
+  const [generateData, setGenerateData] = useState({
+    sanPham: "",
+    thuongHieu: [],
+    xuatXu: [],
+    chatLieu: [],
+    coAo: [],
+    tayAo: [],
+    mauSac: [],
+    kichThuoc: [],
+  });
 
   useEffect(() => {
     fetchSelectOptions();
@@ -55,86 +60,92 @@ export default function AddProduct() {
     }
   };
 
-  const [formData, setFormData] = useState({
-    tenSanPham: "",
-    trangThai: "",
-    thuongHieuId: [],
-    xuatXuId: [],
-    chatLieuId: [],
-    coAoId: [],
-    tayAoId: [],
-    mauSacId: [],
-    kichThuocId: [],
-    variants: [],
-  });
+  const handleSelectChange = (name, selectedOption) => {
+    const newGenerateData = { ...generateData };
 
-  const [modals, setModals] = useState({
-    isNameModalOpen: false,
-    isAttributeModalOpen: false,
-    modalAttribute: "",
-  });
+    if (selectedOption) {
+      if (name === "sanPham") {
+        newGenerateData.sanPham = selectedOption.value;
+      } else if (name === "thuongHieu") {
+        newGenerateData.thuongHieu = selectedOption.map((opt) => opt.value);
+      } else if (name === "xuatXu") {
+        newGenerateData.xuatXu = selectedOption.map((opt) => opt.value);
+      } else if (name === "chatLieu") {
+        newGenerateData.chatLieu = selectedOption.map((opt) => opt.value);
+      } else if (name === "coAo") {
+        newGenerateData.coAo = selectedOption.map((opt) => opt.value);
+      } else if (name === "tayAo") {
+        newGenerateData.tayAo = selectedOption.map((opt) => opt.value);
+      } else if (name === "mauSac") {
+        newGenerateData.mauSac = selectedOption.map((opt) => opt.value);
+      } else if (name === "kichThuoc") {
+        newGenerateData.kichThuoc = selectedOption.map((opt) => opt.value);
+      }
+    }
 
-
-
-  const handleSaveNewProduct = (newProduct) => {
-    setExistingProducts((prev) => [...prev, newProduct]);
-    setFormData((prev) => ({ ...prev, tenSanPham: newProduct.value }));
-    setModals((prev) => ({ ...prev, isNameModalOpen: false }));
+    setGenerateData(newGenerateData);
   };
 
-  const handleSaveNewAttribute = () => {
-    setModals((prev) => ({ ...prev, isAttributeModalOpen: false }));
-  };
+  const handleGenerate = () => {
+    let allSelected = true;
 
-  const handleOpenModal = (attribute) => {
-    setModals({ isAttributeModalOpen: true, modalAttribute: attribute });
-  };
+    for (const [key, value] of Object.entries(generateData)) {
+      if (value === null || value === undefined || (Array.isArray(value) && value.length === 0)) {
+        allSelected = false;
+        console.log(`Thuộc tính ${key} chưa được chọn hoặc có giá trị không hợp lệ.`);
+      }
+    }
 
-  const handleVariantsChange = (newVariants) => {
-    setFormData((prev) => ({ ...prev, variants: newVariants }));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      await ProductService.createProduct(formData);
-      navigate("/admin/product");
-    } catch (error) {
-      console.error("Error saving product:", error);
+    if (!allSelected) {
+      alert("Vui lòng chọn đầy đủ tất cả các thuộc tính!");
     }
   };
 
-  const allAttributesSelected = Object.values(formData).every(
-    (field) => Array.isArray(field) && field.length > 0
-  );
 
   return (
-    <div className="bg-gray-50 min-h-screen">
-      <form onSubmit={handleSubmit}>
-        <div className="grid grid-cols-5 gap-4">
-          <div className="col-span-2 mt-6 p-4 border rounded-lg bg-white">
-            <h2 className="text-lg font-semibold mb-4">Thuộc tính sản phẩm</h2>
+<div className="min-h-screen">
+  <div>
+    <div className="grid grid-cols-5 gap-6 px-6 py-4">
+      {/* Thuộc tính sản phẩm */}
+      <div className="col-span-2 mt-6 p-6 border rounded-lg bg-white shadow-lg">
+        <h2 className="text-2xl font-semibold  mb-6">Thuộc tính sản phẩm</h2>
 
-            <div>
-              <label className="block text-sm font-medium">Tên sản phẩm</label>
-              <CreatableSelect
-                name="tenSanPham"
-                options={sanPhams.map(sanPham => ({ value: sanPham.value, label: sanPham.label }))}
-                value={sanPhams.find(sanPham => sanPham.value === formData.tenSanPham) || null}
-                isClearable
-                className="rounded-lg py-1.5 text-sm w-full"
-              />
-            </div>
+        <div className="space-y-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Tên sản phẩm</label>
+            <CreatableSelect
+              name="tenSanPham"
+              options={sanPhams.map(sanPham => ({ value: sanPham.id, label: sanPham.tenSanPham }))}
+              isClearable
+              onChange={(selectedOption) => {
+                if (selectedOption && !selectedOption.__isNew__) {
+                  setGenerateData((prevData) => ({
+                    ...prevData,
+                    sanPham: selectedOption.value,
+                  }));
+                } else if (selectedOption && selectedOption.__isNew__) {
+                  const newSanPham = { tenSanPham: selectedOption.label };
+                  ProductDetailService.createSanPham(newSanPham).then((newProduct) => {
+                    setSanPhams((prev) => [...prev, { id: newProduct.id, tenSanPham: newProduct.tenSanPham }]);
+                    setGenerateData((prevData) => ({
+                      ...prevData,
+                      sanPham: newProduct.id,
+                    }));
+                  });
+                }
+              }}
+              className="rounded-lg text-sm w-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500"
+            />
+          </div>
 
-            <div className="mt-6 grid grid-cols-2 gap-4">
-
-
-              <div>
+          <div className="grid grid-cols-2 gap-4">
+          <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">Thương hiệu</label>
                 <Select
                   name="thuongHieuId"
                   options={thuongHieus.map(th => ({ value: th.id, label: th.tenThuongHieu }))}
                   isMulti
+                  onChange={(selectedOption) => handleSelectChange("thuongHieu", selectedOption)}
                   className="rounded-lg py-1.5 text-sm w-full"
                 />
               </div>
@@ -145,6 +156,7 @@ export default function AddProduct() {
                   name="xuatXuId"
                   options={xuatXus.map(x => ({ value: x.id, label: x.tenXuatXu }))}
                   isMulti
+                  onChange={(selectedOption) => handleSelectChange("xuatXu", selectedOption)}
                   className="rounded-lg py-1.5 text-sm w-full"
                 />
               </div>
@@ -155,6 +167,7 @@ export default function AddProduct() {
                   name="chatLieuId"
                   options={chatLieus.map(c => ({ value: c.id, label: c.tenChatLieu }))}
                   isMulti
+                  onChange={(selectedOption) => handleSelectChange("chatLieu", selectedOption)}
                   className="rounded-lg py-1.5 text-sm w-full"
                 />
               </div>
@@ -165,6 +178,7 @@ export default function AddProduct() {
                   name="coAoId"
                   options={coAos.map(c => ({ value: c.id, label: c.tenCoAo }))}
                   isMulti
+                  onChange={(selectedOption) => handleSelectChange("coAo", selectedOption)}
                   className="rounded-lg py-1.5 text-sm w-full"
                 />
               </div>
@@ -175,6 +189,7 @@ export default function AddProduct() {
                   name="tayAoId"
                   options={tayAos.map(t => ({ value: t.id, label: t.tenTayAo }))}
                   isMulti
+                  onChange={(selectedOption) => handleSelectChange("tayAo", selectedOption)}
                   className="rounded-lg py-1.5 text-sm w-full"
                 />
               </div>
@@ -185,6 +200,7 @@ export default function AddProduct() {
                   name="mauSacId"
                   options={mauSacs.map(m => ({ value: m.id, label: m.tenMauSac }))}
                   isMulti
+                  onChange={(selectedOption) => handleSelectChange("mauSac", selectedOption)}
                   className="rounded-lg py-1.5 text-sm w-full"
                 />
               </div>
@@ -195,52 +211,33 @@ export default function AddProduct() {
                   name="kichThuocId"
                   options={kichThuocs.map(k => ({ value: k.id, label: k.tenKichThuoc }))}
                   isMulti
+                  onChange={(selectedOption) => handleSelectChange("kichThuoc", selectedOption)}
                   className="rounded-lg py-1.5 text-sm w-full"
                 />
               </div>
-            </div>
           </div>
-
-          {allAttributesSelected && (
-            <div className="col-span-3 mt-6 p-4 border rounded-lg bg-white">
-              <h2 className="text-lg font-semibold mb-4">Biến thể sản phẩm</h2>
-              <ProductVariants
-                attributes={attributes}
-                onVariantsChange={handleVariantsChange}
-              />
-            </div>
-          )}
         </div>
+      </div>
 
-        <div className="mt-4 flex justify-end gap-2">
-          <button
-            type="button"
-            onClick={() => navigate("/admin/product")}
-            className="bg-gray-500 text-white px-4 py-2 rounded-lg"
-          >
-            Hủy
-          </button>
-          <button
-            type="submit"
-            className="bg-orange-500 text-white px-4 py-2 rounded-lg"
-          >
-            Lưu
-          </button>
+      {/* Biến thể sản phẩm */}
+      {Object.values(generateData).every(
+        (value) => value && (!Array.isArray(value) || value.length > 0)
+      ) ? (
+        <div className="col-span-3 mt-6 p-6 border rounded-lg bg-white shadow-lg">
+          <h2 className="text-2xl font-semibold  mb-6">Biến thể sản phẩm</h2>
+          <ProductVariants generateData={generateData} />
         </div>
-      </form>
-
-      <NameModal
-        isOpen={modals.isNameModalOpen}
-        onClose={() => setModals((prev) => ({ ...prev, isNameModalOpen: false }))}
-        onSave={handleSaveNewProduct}
-      />
-
-      <AttributeModal
-        isOpen={modals.isAttributeModalOpen}
-        onClose={() => setModals((prev) => ({ ...prev, isAttributeModalOpen: false }))}
-        onSave={handleSaveNewAttribute}
-        attributeName={modals.modalAttribute}
-      />
+      ) : (
+        <div className="col-span-3 mt-6 p-6 border rounded-lg bg-white shadow-lg flex flex-col items-center justify-center text-center">
+          <div className="w-24 h-24 flex items-center justify-center">
+            <FaLightbulb className="text-5xl text-orange-500" />
+          </div>
+          <p className="text-gray-600 mt-4">Chọn các thuộc tính để hiển thị sản phẩm chi tiết.</p>
+        </div>
+      )}
     </div>
+  </div>
+</div>
+
   );
 }

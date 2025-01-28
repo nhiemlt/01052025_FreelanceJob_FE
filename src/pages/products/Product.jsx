@@ -240,12 +240,12 @@ export default function Product() {
           <button className="text-yellow-500 hover:text-yellow-600" onClick={() => handleUpdateProduct(item)}>
             <AiOutlineEdit size={20} />
           </button>
-          <button
+          {/* <button
             className="text-red-500 hover:text-red-600"
             onClick={() => handleDeleteProduct(item.id)}
           >
             <AiOutlineDelete size={20} />
-          </button>
+          </button> */}
           
           <Switch
             onChange={() => handleToggleStatus(item.id)}

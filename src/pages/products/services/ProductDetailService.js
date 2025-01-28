@@ -4,7 +4,10 @@ const ProductDetailService = {
 
     async createProductDetail(productDetailData) {
         try {
-            const response = await axios.post(`http://localhost:8080/api/san-pham-chi-tiet`, productDetailData);
+            const response = await axios.post(`http://localhost:8080/api/san-pham-chi-tiet`, productDetailData,
+                {
+                    headers: { 'Content-Type': 'application/json' }
+                });
             return response.data.data;
         } catch (error) {
             console.error("Error creating product detail:", error);
@@ -14,10 +17,28 @@ const ProductDetailService = {
 
     async generateProductDetails(generateModel) {
         try {
-            const response = await axios.post(`http://localhost:8080/api/san-pham-chi-tiet/generate`, generateModel);
+            const response = await axios.post(`http://localhost:8080/api/san-pham-chi-tiet/generate`, generateModel,
+                {
+                    headers: { 'Content-Type': 'application/json' }
+                });
             return response.data.data;
         } catch (error) {
             console.error("Error generating product details:", error);
+            throw error;
+        }
+    },
+
+
+    async createSanPham(newSanPham) {
+        console.log("Du lieu", newSanPham)
+        try {
+            const response = await axios.post(`http://localhost:8080/api/san-pham`, newSanPham,
+                {
+                    headers: { 'Content-Type': 'application/json' }
+                });
+            return response.data.data;
+        } catch (error) {
+            console.error("Error fetching product details:", error);
             throw error;
         }
     },
