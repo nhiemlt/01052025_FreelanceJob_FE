@@ -6,90 +6,14 @@ import { AiOutlineEye, AiFillCaretUp, AiFillCaretDown, AiOutlineDelete, AiOutlin
 import Switch from "react-switch";
 import ProductService from "./services/ProductService";
 import { toast } from "react-toastify";
-
-const Modal = ({ isVisible, onConfirm, onCancel }) => {
-  if (!isVisible) return null;
-
-  return (
-    <div className="fixed inset-0 bg-gray-500 bg-opacity-50 flex justify-center items-center z-50">
-      <div className="bg-white rounded-lg shadow p-6 w-96">
-        <h2 className="text-xl mb-4">Xác nhận xóa sản phẩm</h2>
-        <p className="mb-4">Bạn có chắc chắn muốn xóa sản phẩm này không?</p>
-        <div className="flex justify-end gap-4">
-          <button
-            className="bg-gray-300 px-4 py-2 rounded-lg hover:bg-gray-400"
-            onClick={onCancel}
-          >
-            Hủy
-          </button>
-          <button
-            className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600"
-            onClick={onConfirm}
-          >
-            Xóa
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-const UpdateModal = ({ isVisible, onConfirm, onCancel, product, updatedProduct, setUpdatedProduct }) => {
-  if (!isVisible) return null;
-
-  return (
-    <div className="fixed inset-0 bg-gray-500 bg-opacity-50 flex justify-center items-center z-50">
-      <div className="bg-white rounded-lg shadow p-6 w-96">
-        <h2 className="text-xl mb-4">Cập nhật sản phẩm</h2>
-        <div className="mb-4">
-          <label className="block mb-2">Mã sản phẩm</label>
-          <input
-            type="text"
-            className="border rounded-lg px-4 py-2 w-full"
-            value={updatedProduct.maSanPham}
-            onChange={(e) => setUpdatedProduct({ ...updatedProduct, maSanPham: e.target.value })}
-          />
-        </div>
-        <div className="mb-4">
-          <label className="block mb-2">Tên sản phẩm</label>
-          <input
-            type="text"
-            className="border rounded-lg px-4 py-2 w-full"
-            value={updatedProduct.tenSanPham}
-            onChange={(e) => setUpdatedProduct({ ...updatedProduct, tenSanPham: e.target.value })}
-          />
-        </div>
-        <div className="mb-4">
-          <label className="block mb-2">Mô tả</label>
-          <textarea
-            className="border rounded-lg px-4 py-2 w-full"
-            value={updatedProduct.moTa}
-            onChange={(e) => setUpdatedProduct({ ...updatedProduct, moTa: e.target.value })}
-          />
-        </div>
-        <div className="flex justify-end gap-4">
-          <button
-            className="bg-gray-300 px-4 py-2 rounded-lg hover:bg-gray-400"
-            onClick={onCancel}
-          >
-            Hủy
-          </button>
-          <button
-            className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600"
-            onClick={() => onConfirm(updatedProduct)}
-          >
-            Cập nhật
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
+import UpdateModal from './components/UpdateModal';
+import Modal from './components/DeleteModal';
 
 
 export default function Product() {
   const [items, setItems] = useState([]);
   const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [search, setSearch] = useState("");
   const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
@@ -107,8 +31,9 @@ export default function Product() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const products = await ProductService.getAllProducts(currentPage, pageSize, search);
-        setItems(products);
+        const { content, totalPages } = await ProductService.getAllProducts(currentPage, pageSize, search);
+        setItems(content);
+        setTotalPages(totalPages);
       } catch (error) {
         console.error("Error fetching products:", error);
       }
@@ -128,6 +53,19 @@ export default function Product() {
   const handleSearch = (event) => {
     setSearch(event.target.value);
   };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages - 1) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 0) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
 
   const handleViewDetail = (maSanPham) => {
     navigate(`/admin/product/${maSanPham}`);
@@ -151,11 +89,11 @@ export default function Product() {
           item.id === productToUpdate ? { ...item, ...updatedProduct } : item
         );
         setItems(updatedItems);
-        toast.success("Cập nhật sản phẩm thành công!"); 
+        toast.success("Cập nhật sản phẩm thành công!");
       }
     } catch (error) {
       console.error("Error updating product:", error);
-      toast.error("Cập nhật sản phẩm thất bại. Vui lòng thử lại!"); 
+      toast.error("Cập nhật sản phẩm thất bại. Vui lòng thử lại!");
     } finally {
       setUpdateModal(false);
       setProductToUpdate(null);
@@ -174,10 +112,10 @@ export default function Product() {
         item.id === id ? { ...item, trangThai: !item.trangThai } : item
       );
       setItems(updatedItems);
-      toast.success("Thay đổi trạng thái sản phẩm thành công!"); 
+      toast.success("Thay đổi trạng thái sản phẩm thành công!");
     } catch (error) {
       console.error("Error toggling product status:", error);
-      toast.error("Không thể thay đổi trạng thái sản phẩm. Vui lòng thử lại!"); 
+      toast.error("Không thể thay đổi trạng thái sản phẩm. Vui lòng thử lại!");
     }
   };
 
@@ -192,11 +130,11 @@ export default function Product() {
         await ProductService.deleteProduct(productToDelete);
         const updatedItems = items.filter((item) => item.id !== productToDelete);
         setItems(updatedItems);
-        toast.success("Xóa sản phẩm thành công!"); 
+        toast.success("Xóa sản phẩm thành công!");
       }
     } catch (error) {
       console.error("Error deleting product:", error);
-      toast.error("Không thể xóa sản phẩm. Vui lòng thử lại!"); 
+      toast.error("Không thể xóa sản phẩm. Vui lòng thử lại!");
     } finally {
       setShowModal(false);
       setProductToDelete(null);
@@ -246,7 +184,7 @@ export default function Product() {
           >
             <AiOutlineDelete size={20} />
           </button> */}
-          
+
           <Switch
             onChange={() => handleToggleStatus(item.id)}
             checked={item.trangThai}
@@ -369,19 +307,21 @@ export default function Product() {
         <div className="flex items-center gap-2">
           <button
             className="px-3 py-1 border rounded-lg text-gray-500 hover:bg-orange-500 hover:text-white"
-            onClick={() => setCurrentPage(currentPage - 1)}
-            disabled={currentPage === 0}
+            onClick={handlePrevPage}
+            disabled={currentPage === 0}  // Disable khi ở trang đầu
           >
             {"<"}
           </button>
-          <span className="text-sm text-gray-700">{currentPage + 1}</span>
+          <span className="text-sm text-gray-700">Trang {currentPage + 1} / {totalPages}</span>
           <button
             className="px-3 py-1 border rounded-lg text-gray-500 hover:bg-orange-500 hover:text-white"
-            onClick={() => setCurrentPage(currentPage + 1)}
+            onClick={handleNextPage}
+            disabled={currentPage === totalPages - 1}  // Disable khi ở trang cuối
           >
             {">"}
           </button>
         </div>
+
       </div>
 
       <Modal isVisible={showModal} onConfirm={confirmDelete} onCancel={cancelDelete} />

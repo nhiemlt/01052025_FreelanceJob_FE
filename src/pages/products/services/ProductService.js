@@ -1,17 +1,19 @@
 import axios from "axios";
 
 const ProductService = {
-    async getAllProducts(page = 0, size = 10, search = '') {
+    async getAllProducts(page = 0, size = 10, search = '', sortKey = 'id', sortDirection = 'desc') {
         try {
             const response = await axios.get(`http://localhost:8080/api/san-pham`, {
                 params: {
                     page,
                     size,
                     search,
+                    sortKey,
+                    sortDirection,
                 },
             });
-            console.log("API response:", response.data); // Log API response
-            return response.data.data.content; // Access the content array
+            console.log("API response:", response.data.data);
+            return response.data.data; 
         } catch (error) {
             console.error("Error fetching products:", error);
             throw error;

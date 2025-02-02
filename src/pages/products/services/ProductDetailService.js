@@ -21,6 +21,8 @@ const ProductDetailService = {
                 {
                     headers: { 'Content-Type': 'application/json' }
                 });
+                
+            console.log(response)
             return response.data.data;
         } catch (error) {
             console.error("Error generating product details:", error);
@@ -30,7 +32,6 @@ const ProductDetailService = {
 
 
     async createSanPham(newSanPham) {
-        console.log("Du lieu", newSanPham)
         try {
             const response = await axios.post(`http://localhost:8080/api/san-pham`, newSanPham,
                 {

@@ -96,7 +96,7 @@ export default function ProductDetail() {
         page,
         size,
         search,
-        "ngay_tao",
+        "id", 
         "desc",
         filters
       );
@@ -108,6 +108,7 @@ export default function ProductDetail() {
       setLoading(false);
     }
   };
+  
 
   const handleSearchChange = (e) => {
     setSearch(e.target.value);
@@ -145,6 +146,7 @@ export default function ProductDetail() {
   };
 
   const handleUpdateProduct = (product) => {
+    console.log("Updating product:", product); 
     setCurrentProduct(product);
     setModalVisible(true);
   };
@@ -244,6 +246,13 @@ export default function ProductDetail() {
         currentProduct={currentProduct}
         onClose={handleModalClose}
         onUpdate={handleProductUpdate}
+        thuongHieus={thuongHieus}
+        xuatXus={xuatXus}
+        chatLieus={chatLieus}
+        coAos={coAos}
+        tayAos={tayAos}
+        mauSacs={mauSacs}
+        kichThuocs={kichThuocs}
       />
 
 

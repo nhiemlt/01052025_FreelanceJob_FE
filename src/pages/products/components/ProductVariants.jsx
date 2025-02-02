@@ -2,8 +2,10 @@ import React, { useState, useEffect, useCallback } from "react";
 import { FaTrash, FaFileImage } from "react-icons/fa";
 import { toast } from "react-toastify";
 import ProductDetailService from "../services/ProductDetailService";
+import { useNavigate } from "react-router-dom";
 
 export default function ProductVariants({ generateData }) {
+  const navigate = useNavigate();
   const [variantsList, setVariantsList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -12,7 +14,8 @@ export default function ProductVariants({ generateData }) {
     setLoading(true);
     try {
       const response = await ProductDetailService.generateProductDetails(generateData);
-      console.log("Dữ liệu trả về", response);
+
+      console.log(response)
 
       if (response) {
         const productDetails = response?.map((item) => ({
@@ -21,6 +24,7 @@ export default function ProductVariants({ generateData }) {
           variants: item?.sanPhamChiTiet
         }));
 
+        console.log(response)
         setVariantsList(productDetails);
       } else {
         setError("Không có dữ liệu chi tiết sản phẩm.");
@@ -46,7 +50,7 @@ export default function ProductVariants({ generateData }) {
       updatedVariantsList[colorIndex].variants = updatedVariantsList[colorIndex].variants.map(
         (variant, index) => {
           if (index === variantIndex) {
-            return { ...variant, [field]: value }; // Cập nhật giá trị tại đúng variant
+            return { ...variant, [field]: value };
           }
           return variant;
         }
@@ -62,12 +66,11 @@ export default function ProductVariants({ generateData }) {
     updatedVariantsList[colorIndex].variants.splice(variantIndex, 1);
     setVariantsList(updatedVariantsList);
   };
+ 
 
-  // Hàm kiểm tra tính hợp lệ của danh sách
   const isVariantsListValid = () => {
     if (!variantsList || variantsList.length === 0) return false;
 
-    // Kiểm tra từng biến thể trong danh sách
     return variantsList.every((variantData) =>
       variantData.variants.every(
         (variant) =>
@@ -119,14 +122,21 @@ export default function ProductVariants({ generateData }) {
     });
 
     ProductDetailService.createProductDetail(productDetailData)
-      .then((response) => {
-        console.log("Dữ liệu chi tiết sản phẩm đã được lưu", response);
-        toast.success("Dữ liệu chi tiết sản phẩm đã được lưu thành công!");
-      })
-      .catch((error) => {
-        console.error("Có lỗi xảy ra khi lưu chi tiết sản phẩm", error);
-        toast.error("Có lỗi xảy ra khi lưu chi tiết sản phẩm.");
-      });
+  .then((response) => {
+    console.log("Dữ liệu chi tiết sản phẩm đã được lưu", response);
+    toast.success("Dữ liệu chi tiết sản phẩm đã được lưu thành công!");
+
+    const maSanPham = response?.[0]?.sanPham.maSanPham;
+    console.log( response)
+
+      if (maSanPham) {
+        navigate(`/admin/product/${maSanPham}`);
+      }
+  })
+  .catch((error) => {
+    console.error("Có lỗi xảy ra khi lưu chi tiết sản phẩm", error);
+    toast.error("Có lỗi xảy ra khi lưu chi tiết sản phẩm.");
+  });
   };
 
   return (

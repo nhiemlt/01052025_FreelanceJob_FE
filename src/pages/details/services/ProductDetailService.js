@@ -1,14 +1,13 @@
 import axios from "axios";
 
 const ProductDetailService = {
-    async getAllProductDetails(page = 0, size = 10, search = '', sortKey = '', sortDirection = 'asc', filters = {}) {
+    async getAllProductDetails(page = 0, size = 10, search = '', sortField = 'id', sortDirection = 'desc', filters = {}) {
         try {
             const params = {
                 page,
                 size,
                 search,
-                sortKey,
-                sortDirection,
+                sort: `${sortField},${sortDirection}`, 
                 thuongHieuIds: filters.thuongHieuIds ? filters.thuongHieuIds.join(',') : '',
                 xuatXuIds: filters.xuatXuIds ? filters.xuatXuIds.join(',') : '',
                 chatLieuIds: filters.chatLieuIds ? filters.chatLieuIds.join(',') : '',
@@ -17,16 +16,14 @@ const ProductDetailService = {
                 mauSacIds: filters.mauSacIds ? filters.mauSacIds.join(',') : '',
                 kichThuocIds: filters.kichThuocIds ? filters.kichThuocIds.join(',') : ''
             };
-
+    
             const response = await axios.get(`http://localhost:8080/api/san-pham-chi-tiet`, { params });
-            console.log(response);
             return response.data.data;
         } catch (error) {
             console.error("Error fetching product details:", error);
             throw error;
         }
     },
-
 
     async getDetailByProductId(id) {
         try {
