@@ -30,7 +30,17 @@ const ProductTable = ({ sanPhams, handleToggleStatus, handleUpdateProduct, openD
           <tr key={sanPham.id}>
             <td className="px-4 py-2">{index + 1}</td>
             <td className="px-4 py-2">{sanPham.sanPham.maSanPham}</td>
-            <td className="px-4 py-2">{sanPham.sanPham.tenSanPham}</td>
+            <td className="px-4 py-2 flex items-center space-x-2">
+              {sanPham.hinhAnh && (
+                <img
+                  src={sanPham.hinhAnh}
+                  alt={sanPham.sanPham.tenSanPham}
+                  className="w-7 h-7 object-cover rounded-md"
+                />
+              )}
+              <span>{sanPham.sanPham.tenSanPham}</span>
+            </td>
+
             <td className="px-4 py-2">{sanPham.chatLieu?.tenChatLieu || 'N/A'}</td>
             <td className="px-4 py-2">{sanPham.coAo?.tenCoAo || 'N/A'}</td>
             <td className="px-4 py-2">{sanPham.mauSac?.tenMauSac || 'N/A'}</td>
@@ -45,32 +55,38 @@ const ProductTable = ({ sanPhams, handleToggleStatus, handleUpdateProduct, openD
             </td>
 
             <td className="px-4 py-2">
-              <Switch
-                onChange={() => handleToggleStatus(sanPham.id)}
-                checked={sanPham.trangThai}
-                offColor="#d6d6d6"
-                onColor="#4CAF50"
-                offHandleColor="#888"
-                onHandleColor="#fff"
-                checkedIcon={false}
-                uncheckedIcon={false}
-                height={20}
-                width={40}
-              />
+              <td className="px-4 py-2">
+                <div title={sanPham.trangThai ? "Click để tắt" : "Click để kích hoạt"}>
+                  <Switch
+                    onChange={() => handleToggleStatus(sanPham.id)}
+                    checked={sanPham.trangThai}
+                    offColor="#d6d6d6"
+                    onColor="#4CAF50"
+                    offHandleColor="#888"
+                    onHandleColor="#fff"
+                    checkedIcon={false}
+                    uncheckedIcon={false}
+                    height={20}
+                    width={40}
+                  />
+                </div>
+              </td>
+
             </td>
             <td className="px-4 py-2 flex items-center">
               <button
                 className="text-blue-500 hover:text-blue-700 mr-2"
                 onClick={() => handleUpdateProduct(sanPham)}
+                title="Chỉnh sửa sản phẩm"
               >
                 <AiOutlineEdit className="text-xl" />
               </button>
-              <button
+              {/* <button
                 className="text-red-500 hover:text-red-700"
                 onClick={() => openDeleteModal(sanPham)}
               >
                 <AiOutlineDelete className="text-xl" />
-              </button>
+              </button> */}
             </td>
 
           </tr>

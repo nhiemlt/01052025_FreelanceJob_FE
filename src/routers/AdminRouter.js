@@ -15,7 +15,6 @@ const sleeve = lazy(() => import("../pages/attributes/Sleeve"));
 const employee = lazy(() => import("../pages/empoyeis/Employee"));
 
 const adminRoutes = [
-  //   { part: "/dashboard", component: dashboard, role: "admin" },
   { path: "customer", component: customer, role: "admin" },
   { path: "return", component: returnItem, role: "admin" },
   { path: "statistic", component: Statistic, role: "admin" },

@@ -30,6 +30,31 @@ export default function AddProduct() {
     fetchSelectOptions();
   }, []);
 
+  useEffect(() => {
+    if (
+      thuongHieus.length > 0 ||
+      xuatXus.length > 0 ||
+      chatLieus.length > 0 ||
+      coAos.length > 0 ||
+      tayAos.length > 0 ||
+      mauSacs.length > 0 ||
+      kichThuocs.length > 0
+    ) {
+      setGenerateData((prevData) => ({
+        ...prevData,
+        thuongHieu: thuongHieus.length > 0 ? [thuongHieus[0].id] : [],
+        xuatXu: xuatXus.length > 0 ? [xuatXus[0].id] : [],
+        chatLieu: chatLieus.length > 0 ? [chatLieus[0].id] : [],
+        coAo: coAos.length > 0 ? [coAos[0].id] : [],
+        tayAo: tayAos.length > 0 ? [tayAos[0].id] : [],
+        mauSac: mauSacs.length > 0 ? [mauSacs[0].id] : [],
+        kichThuoc: kichThuocs.length > 0 ? [kichThuocs[0].id] : [],
+      }));
+    }
+  }, [thuongHieus, xuatXus, chatLieus, coAos, tayAos, mauSacs, kichThuocs]);
+
+
+
   const fetchSelectOptions = async () => {
     try {
       const sanPhamdata = await ProductDetailService.getSanPham();
@@ -86,7 +111,7 @@ export default function AddProduct() {
     setGenerateData(newGenerateData);
   };
 
-  
+
 
   return (
     <div className="min-h-screen">
@@ -103,6 +128,7 @@ export default function AddProduct() {
                   name="tenSanPham"
                   options={sanPhams.map(sanPham => ({ value: sanPham.id, label: sanPham.tenSanPham }))}
                   isClearable
+                  placeholder="Chọn sản phẩm hoặc nhập tên mới !"
                   onChange={(selectedOption) => {
                     if (selectedOption && !selectedOption.__isNew__) {
                       setGenerateData((prevData) => ({
@@ -131,6 +157,9 @@ export default function AddProduct() {
                     name="thuongHieuId"
                     options={thuongHieus.map(th => ({ value: th.id, label: th.tenThuongHieu }))}
                     isMulti
+                    value={thuongHieus
+                      .filter(th => generateData.thuongHieu.includes(th.id))
+                      .map(th => ({ value: th.id, label: th.tenThuongHieu }))}
                     onChange={(selectedOption) => handleSelectChange("thuongHieu", selectedOption)}
                     className="rounded-lg py-1.5 text-sm w-full"
                   />
@@ -141,6 +170,9 @@ export default function AddProduct() {
                   <Select
                     name="xuatXuId"
                     options={xuatXus.map(x => ({ value: x.id, label: x.tenXuatXu }))}
+                    value={xuatXus
+                      .filter(th => generateData.xuatXu.includes(th.id))
+                      .map(th => ({ value: th.id, label: th.tenXuatXu }))}
                     isMulti
                     onChange={(selectedOption) => handleSelectChange("xuatXu", selectedOption)}
                     className="rounded-lg py-1.5 text-sm w-full"
@@ -152,6 +184,9 @@ export default function AddProduct() {
                   <Select
                     name="chatLieuId"
                     options={chatLieus.map(c => ({ value: c.id, label: c.tenChatLieu }))}
+                    value={chatLieus
+                      .filter(th => generateData.chatLieu.includes(th.id))
+                      .map(th => ({ value: th.id, label: th.tenChatLieu }))}
                     isMulti
                     onChange={(selectedOption) => handleSelectChange("chatLieu", selectedOption)}
                     className="rounded-lg py-1.5 text-sm w-full"
@@ -163,6 +198,9 @@ export default function AddProduct() {
                   <Select
                     name="coAoId"
                     options={coAos.map(c => ({ value: c.id, label: c.tenCoAo }))}
+                    value={coAos
+                      .filter(th => generateData.coAo.includes(th.id))
+                      .map(th => ({ value: th.id, label: th.tenCoAo }))}
                     isMulti
                     onChange={(selectedOption) => handleSelectChange("coAo", selectedOption)}
                     className="rounded-lg py-1.5 text-sm w-full"
@@ -174,6 +212,9 @@ export default function AddProduct() {
                   <Select
                     name="tayAoId"
                     options={tayAos.map(t => ({ value: t.id, label: t.tenTayAo }))}
+                    value={tayAos
+                      .filter(th => generateData.tayAo.includes(th.id))
+                      .map(th => ({ value: th.id, label: th.tenTayAo }))}
                     isMulti
                     onChange={(selectedOption) => handleSelectChange("tayAo", selectedOption)}
                     className="rounded-lg py-1.5 text-sm w-full"
@@ -185,6 +226,9 @@ export default function AddProduct() {
                   <Select
                     name="mauSacId"
                     options={mauSacs.map(m => ({ value: m.id, label: m.tenMauSac }))}
+                    value={mauSacs
+                      .filter(th => generateData.mauSac.includes(th.id))
+                      .map(th => ({ value: th.id, label: th.tenMauSac }))}
                     isMulti
                     onChange={(selectedOption) => handleSelectChange("mauSac", selectedOption)}
                     className="rounded-lg py-1.5 text-sm w-full"
@@ -196,6 +240,9 @@ export default function AddProduct() {
                   <Select
                     name="kichThuocId"
                     options={kichThuocs.map(k => ({ value: k.id, label: k.tenKichThuoc }))}
+                    value={kichThuocs
+                      .filter(th => generateData.kichThuoc.includes(th.id))
+                      .map(th => ({ value: th.id, label: th.tenKichThuoc }))}
                     isMulti
                     onChange={(selectedOption) => handleSelectChange("kichThuoc", selectedOption)}
                     className="rounded-lg py-1.5 text-sm w-full"

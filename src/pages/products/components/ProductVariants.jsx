@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { FaTrash, FaFileImage } from "react-icons/fa";
 import { toast } from "react-toastify";
 import ProductDetailService from "../services/ProductDetailService";
+import UploadFileService from "../services/UploadFileService";
 import { useNavigate } from "react-router-dom";
 
 export default function ProductVariants({ generateData }) {
@@ -9,6 +10,14 @@ export default function ProductVariants({ generateData }) {
   const [variantsList, setVariantsList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleOpenModal = () => setIsModalOpen(true);
+  const handleCloseModal = () => setIsModalOpen(false);
+  const handleConfirmSave = () => {
+    handleSave();
+    handleCloseModal();
+  };
 
   const generateProductDetails = useCallback(async () => {
     setLoading(true);
@@ -66,7 +75,7 @@ export default function ProductVariants({ generateData }) {
     updatedVariantsList[colorIndex].variants.splice(variantIndex, 1);
     setVariantsList(updatedVariantsList);
   };
- 
+
 
   const isVariantsListValid = () => {
     if (!variantsList || variantsList.length === 0) return false;
@@ -83,19 +92,39 @@ export default function ProductVariants({ generateData }) {
     );
   };
 
-  const handleImageUpload = (colorId, file) => {
+  const handleImageUpload = async (colorId, file) => {
     if (!file) return;
 
-    const fileURL = URL.createObjectURL(file);
+    try {
+      const fileURL = URL.createObjectURL(file);
+      setVariantsList((prevList) =>
+        prevList.map((item) =>
+          item.colorId === colorId
+            ? { ...item, previewImage: fileURL }
+            : item
+        )
+      );
 
-    setVariantsList((prevList) =>
-      prevList.map((item) =>
-        item.colorId === colorId
-          ? { ...item, previewImage: fileURL, imageFile: file }
-          : item
-      )
-    );
+      const uploadedImageUrl = await UploadFileService.uploadProductImage(file);
+
+      setVariantsList((prevList) =>
+        prevList.map((color) =>
+          color.colorId === colorId
+            ? {
+              ...color,
+              variants: color.variants.map((variant) => ({
+                ...variant,
+                hinhAnh: uploadedImageUrl,
+              })),
+            }
+            : color
+        )
+      );
+    } catch (error) {
+      console.error("Lỗi khi tải ảnh lên:", error);
+    }
   };
+
 
 
   const handleSave = () => {
@@ -122,21 +151,21 @@ export default function ProductVariants({ generateData }) {
     });
 
     ProductDetailService.createProductDetail(productDetailData)
-  .then((response) => {
-    console.log("Dữ liệu chi tiết sản phẩm đã được lưu", response);
-    toast.success("Dữ liệu chi tiết sản phẩm đã được lưu thành công!");
+      .then((response) => {
+        console.log("Dữ liệu chi tiết sản phẩm đã được lưu", response);
+        toast.success("Dữ liệu chi tiết sản phẩm đã được lưu thành công!");
 
-    const maSanPham = response?.[0]?.sanPham.maSanPham;
-    console.log( response)
+        const maSanPham = response?.[0]?.sanPham.maSanPham;
+        console.log(response)
 
-      if (maSanPham) {
-        navigate(`/admin/product/${maSanPham}`);
-      }
-  })
-  .catch((error) => {
-    console.error("Có lỗi xảy ra khi lưu chi tiết sản phẩm", error);
-    toast.error("Có lỗi xảy ra khi lưu chi tiết sản phẩm.");
-  });
+        if (maSanPham) {
+          navigate(`/admin/product/${maSanPham}`);
+        }
+      })
+      .catch((error) => {
+        console.error("Có lỗi xảy ra khi lưu chi tiết sản phẩm", error);
+        toast.error("Có lỗi xảy ra khi lưu chi tiết sản phẩm.");
+      });
   };
 
   return (
@@ -181,7 +210,7 @@ export default function ProductVariants({ generateData }) {
                           <input
                             type="text"
                             value={variant.donGia}
-                            onChange={(e) => handleInputChange(idx, index, "donGia", e.target.value)} 
+                            onChange={(e) => handleInputChange(idx, index, "donGia", e.target.value)}
                             placeholder="Nhập giá"
                             className="border-2 border-blue-100 rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-blue-300"
                           />
@@ -254,7 +283,7 @@ export default function ProductVariants({ generateData }) {
       {isVariantsListValid() && (
         <div className="flex justify-end">
           <button
-            onClick={handleSave}
+            onClick={handleOpenModal}
             className="bg-orange-500 text-white px-4 py-2 rounded-lg mt-6"
           >
             Lưu chi tiết sản phẩm
@@ -262,6 +291,30 @@ export default function ProductVariants({ generateData }) {
         </div>
       )}
 
+      {isModalOpen && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-8 rounded-lg shadow-xl w-[350px] text-center">
+
+            <h3 className="text-xl font-semibold text-gray-800">Thông báo</h3>
+            <p className="text-gray-600 mt-2">Vui lòng xác nhận trước khi lưu?</p>
+
+            <div className="mt-6 flex justify-center space-x-3">
+              <button
+                onClick={handleCloseModal}
+                className="bg-gray-300 text-gray-800 px-5 py-2 rounded-lg hover:bg-gray-400 transition-all"
+              >
+                Hủy
+              </button>
+              <button
+                onClick={handleConfirmSave}
+                className="bg-blue-500 text-white px-5 py-2 rounded-lg hover:bg-blue-600 transition-all"
+              >
+                Xác nhận
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

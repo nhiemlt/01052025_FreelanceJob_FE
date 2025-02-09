@@ -14,7 +14,9 @@ const ProductDetailService = {
                 coAoIds: filters.coAoIds ? filters.coAoIds.join(',') : '',
                 tayAoIds: filters.tayAoIds ? filters.tayAoIds.join(',') : '',
                 mauSacIds: filters.mauSacIds ? filters.mauSacIds.join(',') : '',
-                kichThuocIds: filters.kichThuocIds ? filters.kichThuocIds.join(',') : ''
+                kichThuocIds: filters.kichThuocIds ? filters.kichThuocIds.join(',') : '',
+                minPrice: filters.minPrice ?? '',  
+                maxPrice: filters.maxPrice ?? ''   
             };
     
             const response = await axios.get(`http://localhost:8080/api/san-pham-chi-tiet`, { params });
@@ -24,6 +26,7 @@ const ProductDetailService = {
             throw error;
         }
     },
+    
 
     async getDetailByProductId(id) {
         try {

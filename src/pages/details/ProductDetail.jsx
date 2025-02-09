@@ -18,6 +18,8 @@ export default function ProductDetail() {
   const [tayAos, setTayAos] = useState([]);
   const [thuongHieus, setThuongHieus] = useState([]);
   const [xuatXus, setXuatXus] = useState([]);
+  const [minPrice, setMinPrice] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
 
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(0);
@@ -34,6 +36,8 @@ export default function ProductDetail() {
     tayAoIds: [],
     mauSacIds: [],
     kichThuocIds: [],
+    minPrice: 0,
+    maxPrice: 10000000,
   });
 
   const [modalVisible, setModalVisible] = useState(false);
@@ -84,6 +88,7 @@ export default function ProductDetail() {
 
       const xuatXuData = await ProductDetailService.getXuatXu();
       setXuatXus(xuatXuData);
+
     } catch (error) {
       setError("Error fetching select options");
     }
@@ -115,6 +120,15 @@ export default function ProductDetail() {
     setPage(0);
   };
 
+  const handlePriceChange = (field, value) => {
+    setFilters(prevFilters => ({
+      ...prevFilters,
+      [field]: value ? parseFloat(value) : ""
+    }));
+    setPage(0);
+  };
+  
+
   const handleFilterChange = (field, selectedOptions) => {
     setFilters(prevFilters => ({
       ...prevFilters,
@@ -122,7 +136,24 @@ export default function ProductDetail() {
     }));
     setPage(0);
   };
+  
 
+  const resetFilters = () => {
+    setFilters({
+      thuongHieuIds: [],
+      xuatXuIds: [],
+      chatLieuIds: [],
+      coAoIds: [],
+      tayAoIds: [],
+      mauSacIds: [],
+      kichThuocIds: [],
+      minPrice: 0,
+      maxPrice: 10000000,
+    });
+    setPage(0);
+    fetchProductDetails(); 
+  };
+  
 
   const handleToggleStatus = async (id) => {
     try {
@@ -194,6 +225,7 @@ export default function ProductDetail() {
         search={search}
         handleFilterChange={handleFilterChange}
         handleSearchChange={handleSearchChange}
+        handlePriceChange={handlePriceChange}
         thuongHieus={thuongHieus}
         xuatXus={xuatXus}
         chatLieus={chatLieus}
@@ -201,22 +233,10 @@ export default function ProductDetail() {
         tayAos={tayAos}
         mauSacs={mauSacs}
         kichThuocs={kichThuocs}
+        minPrice={minPrice}
+        maxPrice={maxPrice}
+        resetFilters={resetFilters} 
       />
-
-      <div className="flex justify-end gap-4 mb-4">
-        <button
-          className="bg-orange-500 text-white px-4 py-2 rounded-lg mt-6"
-          // onClick={handleExportToExcel}  
-        >
-          Xuất Excel
-        </button>
-        <button
-          className="bg-orange-500 text-white px-4 py-2 rounded-lg mt-6"
-          // onClick={handleCreateQR}  
-        >
-          Tạo QR
-        </button>
-      </div>
 
       {loading ? (
         <div className="text-center">Loading...</div>

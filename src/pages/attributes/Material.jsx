@@ -177,7 +177,7 @@ export default function ChatLieu() {
     });
 
     return sortedItems.map((item, index) => (
-      <tr key={item.id} className={index % 2 === 0 ? "bg-gray-50" : "bg-white"}>
+      <tr key={item.id} className="bg-white hover:bg-gray-100 transition-colors">
         <td className="px-4 py-2">{index + 1}</td>
         <td
           className="px-4 py-2 cursor-pointer"
@@ -201,20 +201,22 @@ export default function ChatLieu() {
           {item.trangThai ? " Kích hoạt" : " Ngừng hoạt động"}
         </td>
         <td className="px-4 py-2 flex justify-center gap-4">
-          <Switch
-            onChange={() => handleToggleStatus(item.id)}
-            checked={item.trangThai}
-            offColor="#808080"
-            onColor="#00a000"
-            uncheckedIcon={false}
-            checkedIcon={false}
-            height={20}
-            width={40}
-          />
-          <AiOutlineDelete
+        <div title={item.trangThai ? "Click để tắt" : "Click để kích hoạt"}>
+            <Switch
+              onChange={() => handleToggleStatus(item.id)}
+              checked={item.trangThai}
+              offColor="#808080"
+              onColor="#00a000"
+              uncheckedIcon={false}
+              checkedIcon={false}
+              height={20}
+              width={40}
+            />
+            </div>
+          {/* <AiOutlineDelete
             className="text-red-500 cursor-pointer"
             onClick={() => handleDeleteChatLieu(item.id)}
-          />
+          /> */}
         </td>
       </tr>
     ));
@@ -273,7 +275,7 @@ export default function ChatLieu() {
 
 
       <table className="table-auto w-full px-4 py-2 bg-white rounded-lg shadow overflow-hidden text-center">
-        <thead>
+        <thead classname="bg-gray-100 text-center">
           <tr>
             {renderSortableHeader("STT", "id")}
             {renderSortableHeader("Tên chất liệu", "tenChatLieu")}

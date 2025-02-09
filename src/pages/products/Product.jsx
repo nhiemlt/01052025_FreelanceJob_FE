@@ -159,7 +159,7 @@ export default function Product() {
     });
 
     return sortedItems.map((item, index) => (
-      <tr key={item.id} className={index % 2 === 0 ? "bg-gray-50" : "bg-white"}>
+      <tr key={item.id} className="bg-white hover:bg-gray-100 transition-colors">
         <td className="px-4 py-2">{index + 1}</td>
         <td className="px-4 py-2">{item.maSanPham}</td>
         <td className="px-4 py-2">{item.tenSanPham}</td>
@@ -261,7 +261,7 @@ export default function Product() {
             className="bg-orange-500 text-white px-4 py-2 rounded-lg shadow hover:bg-orange-600"
             onClick={exportToExcel}
           >
-            Export Excel
+            In Excel
           </button>
 
           <button
