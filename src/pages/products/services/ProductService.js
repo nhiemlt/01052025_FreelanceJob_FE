@@ -8,12 +8,11 @@ const ProductService = {
                     page,
                     size,
                     search,
-                    sortKey,
-                    sortDirection,
+                    sort: `${sortKey},${sortDirection}`
                 },
             });
             console.log("API response:", response.data.data);
-            return response.data.data; 
+            return response.data.data;
         } catch (error) {
             console.error("Error fetching products:", error);
             throw error;

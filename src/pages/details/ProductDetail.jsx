@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
+import { utils, writeFile } from "xlsx";
+import { format } from "date-fns";
 import ProductDetailService from "./services/ProductDetailService";
 import { toast } from "react-toastify";
 import ProductUpdateModal from "./components/ProductUpdateModal";
@@ -48,6 +50,32 @@ export default function ProductDetail() {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  const exportToExcel = () => {
+    const dataToExport = sanPhams.map((sanPham, index) => ({
+      "STT": index + 1,
+      "Mã sản phẩm": sanPham.sanPham.maSanPham,
+      "Tên sản phẩm": sanPham.sanPham.tenSanPham,
+      "Chất liệu": sanPham.chatLieu?.tenChatLieu || "N/A",
+      "Cổ áo": sanPham.coAo?.tenCoAo || "N/A",
+      "Màu sắc": sanPham.mauSac?.tenMauSac || "N/A",
+      "Kích thước": sanPham.kichThuoc?.tenKichThuoc || "N/A",
+      "Tay áo": sanPham.tayAo?.tenTayAo || "N/A",
+      "Thương hiệu": sanPham.thuongHieu?.tenThuongHieu || "N/A",
+      "Xuất xứ": sanPham.xuatXu?.tenXuatXu || "N/A",
+      "Số lượng": sanPham.soLuong,
+      "Đơn giá": sanPham.donGia,
+      "Ngày tạo": format(new Date(sanPham.ngayTao), "HH:mm:ss dd/MM/yyyy"),
+      "Trạng thái": sanPham.trangThai ? "Còn hàng" : "Hết hàng",
+    }));
+  
+    const ws = utils.json_to_sheet(dataToExport);
+    const wb = utils.book_new();
+    utils.book_append_sheet(wb, ws, "Sản phẩm");
+  
+    writeFile(wb, "san_pham.xlsx");
+  };
+  
 
   useEffect(() => {
     fetchSelectOptions();
@@ -101,7 +129,7 @@ export default function ProductDetail() {
         page,
         size,
         search,
-        "id", 
+        "id",
         "desc",
         filters
       );
@@ -113,7 +141,7 @@ export default function ProductDetail() {
       setLoading(false);
     }
   };
-  
+
 
   const handleSearchChange = (e) => {
     setSearch(e.target.value);
@@ -127,7 +155,7 @@ export default function ProductDetail() {
     }));
     setPage(0);
   };
-  
+
 
   const handleFilterChange = (field, selectedOptions) => {
     setFilters(prevFilters => ({
@@ -136,7 +164,7 @@ export default function ProductDetail() {
     }));
     setPage(0);
   };
-  
+
 
   const resetFilters = () => {
     setFilters({
@@ -151,9 +179,9 @@ export default function ProductDetail() {
       maxPrice: 10000000,
     });
     setPage(0);
-    fetchProductDetails(); 
+    fetchProductDetails();
   };
-  
+
 
   const handleToggleStatus = async (id) => {
     try {
@@ -177,7 +205,7 @@ export default function ProductDetail() {
   };
 
   const handleUpdateProduct = (product) => {
-    console.log("Updating product:", product); 
+    console.log("Updating product:", product);
     setCurrentProduct(product);
     setModalVisible(true);
   };
@@ -216,7 +244,6 @@ export default function ProductDetail() {
     }
   }
 
-
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
       <h1 className="text-xl font-bold mb-4">Chi tiết sản phẩm</h1>
@@ -235,7 +262,8 @@ export default function ProductDetail() {
         kichThuocs={kichThuocs}
         minPrice={minPrice}
         maxPrice={maxPrice}
-        resetFilters={resetFilters} 
+        resetFilters={resetFilters}
+        exportToExcel={exportToExcel}
       />
 
       {loading ? (

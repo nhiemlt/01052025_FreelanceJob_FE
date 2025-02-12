@@ -10,7 +10,7 @@ const ProductFilters = ({
     handlePriceChange,
     handleSearchChange,
     handleFilterChange,
-    resetFilters,
+    exportToExcel,
     thuongHieus,
     xuatXus,
     chatLieus,
@@ -165,6 +165,7 @@ const ProductFilters = ({
 
                     <button
                         className="w-full py-2 px-3 text-sm font-medium text-white bg-orange-500 rounded-md hover:bg-orange-600 transition"
+                        onClick={exportToExcel}
                     >
                         Xuất Excel
                     </button>

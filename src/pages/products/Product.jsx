@@ -16,7 +16,7 @@ export default function Product() {
   const [totalPages, setTotalPages] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [search, setSearch] = useState("");
-  const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
+  const [sortConfig, setSortConfig] = useState({ key: "id", direction: "desc" });
   const [showModal, setShowModal] = useState(false);
   const [productToDelete, setProductToDelete] = useState(null);
   const [updateModal, setUpdateModal] = useState(false);
@@ -31,16 +31,23 @@ export default function Product() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const { content, totalPages } = await ProductService.getAllProducts(currentPage, pageSize, search);
+        const { content, totalPages } = await ProductService.getAllProducts(
+          currentPage, 
+          pageSize, 
+          search, 
+          sortConfig.key, 
+          sortConfig.direction
+        );
         setItems(content);
         setTotalPages(totalPages);
       } catch (error) {
         console.error("Error fetching products:", error);
       }
     };
-
+  
     fetchProducts();
   }, [currentPage, pageSize, search, sortConfig]);
+  
 
   const handleSort = (key) => {
     let direction = "asc";

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { FaTrash, FaFileImage } from "react-icons/fa";
+import { FaTrash, FaFileImage  } from "react-icons/fa";
+import { AiFillWarning } from "react-icons/ai";
 import { toast } from "react-toastify";
 import ProductDetailService from "../services/ProductDetailService";
 import UploadFileService from "../services/UploadFileService";
@@ -67,7 +68,6 @@ export default function ProductVariants({ generateData }) {
       setVariantsList(updatedVariantsList);
     }
   };
-
 
 
   const handleRemoveVariant = (colorIndex, variantIndex) => {
@@ -169,29 +169,32 @@ export default function ProductVariants({ generateData }) {
   };
 
   return (
-    <div className="mt-6 p-6 border-2 border-blue-100 rounded-xl bg-white shadow-md">
+    <div className="border-2 h-full rounded-xl flex flex-col ">
       {error && <div className="text-red-500 mb-4">{error}</div>}
-
+  
       {loading ? (
         <div className="flex justify-center items-center p-8">
           <div className="animate-spin h-8 w-8 border-b-2 border-blue-500 rounded-full"></div>
         </div>
+      ) : variantsList.length === 0 ? (
+        <div className="col-span-3 h-full border rounded-lg bg-white shadow-lg flex flex-col items-center justify-center text-center">
+            <AiFillWarning className="text-5xl text-orange-500" />
+          <p className="text-gray-600 mt-4">Sản phẩm đã tồn tại, vui lòng chọn thuộc tính khác</p>
+        </div>
       ) : (
-        variantsList.map((variantData, idx) => (
+        <div className="flex-grow overflow-y-auto p-6">
+        {variantsList.map((variantData, idx) => (
           <div key={variantData.colorId} className="mb-6">
             <h2 className="text-lg font-semibold mb-4">
               Chi tiết sản phẩm màu {variantData.colorName}
             </h2>
-
+  
             <div className="overflow-x-auto">
               <table className="min-w-full">
                 <thead>
                   <tr className="bg-blue-50">
                     {["STT", "Sản phẩm", "Giá", "Số lượng", "Xóa"].map((header) => (
-                      <th
-                        key={header}
-                        className="py-3 px-4 text-left text-xs font-semibold uppercase tracking-wider"
-                      >
+                      <th key={header} className="py-3 px-4 text-left text-xs font-semibold uppercase tracking-wider">
                         {header}
                       </th>
                     ))}
@@ -200,10 +203,7 @@ export default function ProductVariants({ generateData }) {
                 <tbody>
                   {variantData?.variants?.length > 0 ? (
                     variantData.variants.map((variant, index) => (
-                      <tr
-                        key={`${variant.maMauSac}-${variant.tenKichThuoc}-${index}`}
-                        className="border-b hover:bg-blue-50 transition-colors"
-                      >
+                      <tr key={`${variant.maMauSac}-${variant.tenKichThuoc}-${index}`} className="border-b hover:bg-blue-50 transition-colors">
                         <td className="py-3 px-4">{index + 1}</td>
                         <td className="py-3 px-4">{`${variant.tenThuongHieu} ${variant.tenXuatXu} ${variant.tenChatLieu} ${variant.tenCoAo} ${variant.tenTayAo} size ${variant.tenKichThuoc}`}</td>
                         <td className="py-3 px-6">
@@ -224,17 +224,10 @@ export default function ProductVariants({ generateData }) {
                             className="border-2 border-blue-100 rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-blue-300"
                           />
                         </td>
-
                         <td className="py-3 px-4">
-                          <td className="py-3 px-4">
-                            <button
-                              onClick={() => handleRemoveVariant(idx, index)}
-                              className="text-red-500 hover:text-red-700"
-                            >
-                              <FaTrash />
-                            </button>
-                          </td>
-
+                          <button onClick={() => handleRemoveVariant(idx, index)} className="text-red-500 hover:text-red-700">
+                            <FaTrash />
+                          </button>
                         </td>
                       </tr>
                     ))
@@ -248,7 +241,7 @@ export default function ProductVariants({ generateData }) {
                 </tbody>
               </table>
             </div>
-
+            
             <div className="mt-6 bg-blue-50 p-4 rounded-lg border-2 border-dashed border-blue-300 relative">
               <input
                 type="file"
@@ -277,38 +270,28 @@ export default function ProductVariants({ generateData }) {
 
 
           </div>
-        ))
-      )}
-
-      {isVariantsListValid() && (
-        <div className="flex justify-end">
-          <button
-            onClick={handleOpenModal}
-            className="bg-orange-500 text-white px-4 py-2 rounded-lg mt-6"
-          >
-            Lưu chi tiết sản phẩm
-          </button>
-        </div>
-      )}
-
+        ))}
+      </div>
+    )}
+  
+    {isVariantsListValid() && (
+      <div className="p-6 flex justify-end mt-auto">
+        <button onClick={handleOpenModal} className="bg-orange-500 text-white px-4 py-2 rounded-lg">
+          Lưu chi tiết sản phẩm
+        </button>
+      </div>
+    )}
+  
       {isModalOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-8 rounded-lg shadow-xl w-[350px] text-center">
-
             <h3 className="text-xl font-semibold text-gray-800">Thông báo</h3>
             <p className="text-gray-600 mt-2">Vui lòng xác nhận trước khi lưu?</p>
-
             <div className="mt-6 flex justify-center space-x-3">
-              <button
-                onClick={handleCloseModal}
-                className="bg-gray-300 text-gray-800 px-5 py-2 rounded-lg hover:bg-gray-400 transition-all"
-              >
+              <button onClick={handleCloseModal} className="bg-gray-300 text-gray-800 px-5 py-2 rounded-lg hover:bg-gray-400 transition-all">
                 Hủy
               </button>
-              <button
-                onClick={handleConfirmSave}
-                className="bg-blue-500 text-white px-5 py-2 rounded-lg hover:bg-blue-600 transition-all"
-              >
+              <button onClick={handleConfirmSave} className="bg-blue-500 text-white px-5 py-2 rounded-lg hover:bg-blue-600 transition-all">
                 Xác nhận
               </button>
             </div>
@@ -317,4 +300,5 @@ export default function ProductVariants({ generateData }) {
       )}
     </div>
   );
+  
 }

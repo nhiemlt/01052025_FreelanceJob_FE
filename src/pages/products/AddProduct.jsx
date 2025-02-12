@@ -14,6 +14,7 @@ export default function AddProduct() {
   const [tayAos, setTayAos] = useState([]);
   const [thuongHieus, setThuongHieus] = useState([]);
   const [xuatXus, setXuatXus] = useState([]);
+  const [showProductDetails, setShowProductDetails] = useState(false);
 
   const [generateData, setGenerateData] = useState({
     sanPham: "",
@@ -52,8 +53,6 @@ export default function AddProduct() {
       }));
     }
   }, [thuongHieus, xuatXus, chatLieus, coAos, tayAos, mauSacs, kichThuocs]);
-
-
 
   const fetchSelectOptions = async () => {
     try {
@@ -256,12 +255,13 @@ export default function AddProduct() {
           {Object.values(generateData).every(
             (value) => value && (!Array.isArray(value) || value.length > 0)
           ) ? (
-            <div className="col-span-3 mt-6 p-6 border rounded-lg bg-white shadow-lg">
-              <h2 className="text-2xl font-semibold  mb-6">Biến thể sản phẩm</h2>
+            <div className="col-span-3 mt-6 bg-white ">
               <ProductVariants generateData={generateData} />
             </div>
           ) : (
+            
             <div className="col-span-3 mt-6 p-6 border rounded-lg bg-white shadow-lg flex flex-col items-center justify-center text-center">
+              
               <div className="w-24 h-24 flex items-center justify-center">
                 <FaLightbulb className="text-5xl text-orange-500" />
               </div>
