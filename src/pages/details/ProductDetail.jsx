@@ -68,14 +68,14 @@ export default function ProductDetail() {
       "Ngày tạo": format(new Date(sanPham.ngayTao), "HH:mm:ss dd/MM/yyyy"),
       "Trạng thái": sanPham.trangThai ? "Còn hàng" : "Hết hàng",
     }));
-  
+
     const ws = utils.json_to_sheet(dataToExport);
     const wb = utils.book_new();
     utils.book_append_sheet(wb, ws, "Sản phẩm");
-  
+
     writeFile(wb, "san_pham.xlsx");
   };
-  
+
 
   useEffect(() => {
     fetchSelectOptions();
@@ -245,8 +245,10 @@ export default function ProductDetail() {
   }
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
-      <h1 className="text-xl font-bold mb-4">Chi tiết sản phẩm</h1>
+    <div className="p-6 bg-gray-50 min-h-screen"><h1 className="text-xl font-bold mb-4">
+      Chi tiết sản phẩm {sanPhams.length > 0 ? sanPhams[0].sanPham.tenSanPham : ""}
+    </h1>
+
       <ProductFilters
         filters={filters}
         search={search}
