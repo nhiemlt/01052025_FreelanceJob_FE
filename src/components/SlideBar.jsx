@@ -1,103 +1,148 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import SubSlideBar from "./SubSlideBar";
+import {
+  FaChartBar,
+  FaUserTie,
+  FaStore,
+  FaBox,
+  FaUsers,
+  FaUndo,
+  FaChevronDown,
+} from "react-icons/fa";
 
 function SlideBar() {
-  const [click, setClick] = useState("thongKe");
-  const [showSubMenu, setShowSubMenu] = useState(false);
-  const [showSubMenu2, setShowSubMenu2] = useState(false);
-  const [showSubMenu3, setShowSubMenu3] = useState(false);
+  const [activeMenu, setActiveMenu] = useState("thongKe");
+  const [showProductMenu, setShowProductMenu] = useState(false);
+  const [showAccountMenu, setShowAccountMenu] = useState(false);
 
-  const handleClick = (item) => {
-    setClick(item);
-    setShowSubMenu(item === "quanLySanPham" ? !showSubMenu : false);
-    setShowSubMenu2(item === "quanLyTaiKhoan" ? !showSubMenu2 : false);
-    setShowSubMenu3(item === "quanLyThuocTinh" ? !showSubMenu3 : false); 
+  const toggleMenu = (menu) => {
+    setActiveMenu(menu);
+    if (menu === "quanLySanPham") setShowProductMenu(!showProductMenu);
+    if (menu === "quanLyTaiKhoan") setShowAccountMenu(!showAccountMenu);
   };
 
-  const ItemOfProduct = [
-    { label: "Sản phẩm", icon: "fa-solid fa-cube", path: "product" },
-    { label: "Danh mục", icon: "fa-solid fa-tag", path: "" },
-    { label: "Báo cáo sản phẩm", icon: "fa-solid fa-book", path: "" },
-    { label: "Chất liệu", icon: "fa-solid fa-book", path: "" },
+  const productItems = [
+    { label: "Sản phẩm", icon: <FaBox />, path: "product" },
+    { label: "Chất liệu", icon: <FaBox />, path: "material" },
+    { label: "Cổ áo", icon: <FaBox />, path: "collar" },
+    { label: "Màu sắc", icon: <FaBox />, path: "color" },
+    { label: "Kích thước", icon: <FaBox />, path: "size" },
+    { label: "Tay áo", icon: <FaBox />, path: "sleeve" },
+    { label: "Thương hiệu", icon: <FaBox />, path: "brand" },
+    { label: "Xuất xứ", icon: <FaBox />, path: "origin" },
   ];
 
-  const ItemOfAtribute = [
-    { label: "Chất liệu", icon: "fa-solid fa-cube", path: "material" },
-    { label: "Cổ áo", icon: "fa-solid fa-tag", path: "collar" },
-    { label: "Màu sắc", icon: "fa-solid fa-book", path: "color" },
-    { label: "Kích thước", icon: "fa-solid fa-book", path: "size" },
-    { label: "Tay áo", icon: "fa-solid fa-book", path: "sleeve" },
-    { label: "Thương hiệu", icon: "fa-solid fa-book", path: "brand" },
-    { label: "Xuất xứ", icon: "fa-solid fa-book", path: "origin" },
-  ];
-
-  const ItemOfAcount = [
-    { label: "Nhân Viên", icon: "fa-solid fa-cube", path: "employee" },
-    { label: "Khách Hàng", icon: "fa-solid fa-tag", path: "customer" },
+  const accountItems = [
+    { label: "Nhân Viên", icon: <FaUserTie />, path: "employee" },
+    { label: "Khách Hàng", icon: <FaUsers />, path: "customer" },
   ];
 
   return (
-    <div className="slideBar-items">
-      <div className="logo">
-        <img src="/public/logo2.png" alt="Đây là logo" />
+    <div className="w-64 min-h-screen bg-base-200 shadow-lg p-4">
+      <div className="flex justify-center mb-4">
+        <img src="/public/logo2.png" alt="Logo" className="w-24" />
       </div>
-      <div className="nav">
-        <ul className="item">
-          <li
-            onClick={() => handleClick("thongKe")}
-            className={click === "thongKe" ? "active" : ""}
-          >
-            <Link to="/admin/statistic">Thống kê</Link>
-          </li>
 
-          <li
-            onClick={() => handleClick("nhanVien")}
-            className={click === "nhanVien" ? "active" : ""}
+      <ul className="menu w-full">
+        <li>
+          <Link
+            to="/admin/statistic"
+            className={`menu-item ${activeMenu === "thongKe" ? "active" : ""}`}
+            onClick={() => toggleMenu("thongKe")}
           >
-            <Link to="/admin/customer">Nhân Viên</Link>
-          </li>
+            <FaChartBar /> Thống kê
+          </Link>
+        </li>
 
-          <li
-            onClick={() => handleClick("banHangTaiQuay")}
-            className={click === "banHangTaiQuay" ? "active" : ""}
+        <li>
+          <Link
+            to="/admin/customer"
+            className={`menu-item ${activeMenu === "nhanVien" ? "active" : ""}`}
+            onClick={() => toggleMenu("nhanVien")}
           >
-            <Link>Bán hàng tại quầy</Link>
-          </li>
-          <li>
-            <Link>Đơn Hàng</Link>
-          </li>
+            <FaUserTie /> Nhân Viên
+          </Link>
+        </li>
 
-          <li
-            onClick={() => handleClick("quanLySanPham")}
-            className={click === "quanLySanPham" ? "active" : ""}
+        <li>
+          <Link
+            to="/admin/counterSale"
+            className={`menu-item ${activeMenu === "banHangTaiQuay" ? "active" : ""}`}
+            onClick={() => toggleMenu("banHangTaiQuay")}
           >
-            <Link>Quản lý sản phẩm</Link>
-          </li>
-          {showSubMenu && <SubSlideBar items={ItemOfProduct} />}
-          <li
-            onClick={() => handleClick("quanLyThuocTinh")}
-            className={click === "quanLyThuocTinh" ? "active" : ""} 
-          >
-            <Link>Quản lý thuộc tính</Link>
-          </li>
-          {showSubMenu3 && <SubSlideBar items={ItemOfAtribute} />} 
+            <FaStore /> Bán hàng tại quầy
+          </Link>
+        </li>
 
-          <li
-            onClick={() => handleClick("quanLyTaiKhoan")}
-            className={click === "quanLyTaiKhoan" ? "active" : ""}
+        <li>
+          <Link
+            to="/admin/order"
+            className={`menu-item ${activeMenu === "donHang" ? "active" : ""}`}
+            onClick={() => toggleMenu("donHang")}
           >
-            <Link>Quản lý tài khoản</Link>
-          </li>
-          {showSubMenu2 && <SubSlideBar items={ItemOfAcount} />}
-          <li>
-            <Link to="/admin/return">Trả Hàng</Link>
-          </li>
-          <li>
-            <Link>Khuyến mãi</Link>
-          </li>
-        </ul>
-      </div>
+            <FaBox /> Đơn Hàng
+          </Link>
+        </li>
+
+        {/* Quản lý sản phẩm */}
+        <li>
+          <div
+            className="menu-item flex justify-between"
+            onClick={() => toggleMenu("quanLySanPham")}
+          >
+            <span className="flex items-center gap-2">
+              <FaBox /> Quản lý sản phẩm
+            </span>
+            <FaChevronDown className={`transition ${showProductMenu ? "rotate-180" : ""}`} />
+          </div>
+          {showProductMenu && (
+            <ul className="pl-4">
+              {productItems.map((item) => (
+                <li key={item.path}>
+                  <Link to={`/admin/${item.path}`} className="menu-subitem">
+                    {item.icon} {item.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </li>
+
+        {/* Quản lý tài khoản */}
+        <li>
+          <div
+            className="menu-item flex justify-between"
+            onClick={() => toggleMenu("quanLyTaiKhoan")}
+          >
+            <span className="flex items-center gap-2">
+              <FaUsers /> Quản lý tài khoản
+            </span>
+            <FaChevronDown className={`transition ${showAccountMenu ? "rotate-180" : ""}`} />
+          </div>
+          {showAccountMenu && (
+            <ul className="pl-4">
+              {accountItems.map((item) => (
+                <li key={item.path}>
+                  <Link to={`/admin/${item.path}`} className="menu-subitem">
+                    {item.icon} {item.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </li>
+
+        <li>
+          <Link to="/admin/return" className="menu-item">
+            <FaUndo /> Trả Hàng
+          </Link>
+        </li>
+        <li>
+          <Link className="menu-item">
+            <FaBox /> Khuyến mãi
+          </Link>
+        </li>
+      </ul>
     </div>
   );
 }

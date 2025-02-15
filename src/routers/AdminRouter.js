@@ -1,4 +1,5 @@
 import { lazy } from "react";
+
 const customer = lazy(() => import("../pages/customers/Customer"));
 const returnItem = lazy(() => import("../pages/returns/Return"));
 const Statistic = lazy(() => import("../pages/statistics/Statistic"));
@@ -13,6 +14,10 @@ const origin = lazy(() => import("../pages/attributes/Origin"));
 const size = lazy(() => import("../pages/attributes/Size"));
 const sleeve = lazy(() => import("../pages/attributes/Sleeve"));
 const employee = lazy(() => import("../pages/empoyeis/Employee"));
+const order = lazy(() => import("../pages/orders/Order"));
+const discount = lazy(() => import("../pages/discounts/Discount"));
+const detailOrder = lazy(() => import("../pages/detailOrder/DetailOrder"));
+const counterSale = lazy(() => import("../pages/counterSales/CounterSale"));
 
 const adminRoutes = [
   { path: "customer", component: customer, role: "admin" },
@@ -29,5 +34,10 @@ const adminRoutes = [
   { path: "size", component: size, role: "admin" },
   { path: "sleeve", component: sleeve, role: "admin" },
   { path: "employee", component: employee, role: "admin" },
+  { path: "order", component: order, role: "admin" },
+  { path: "discount", component: discount, role: "admin" },
+  { path: "detailOrder/:id", component: detailOrder, role: "admin" },
+  { path: "counterSale", component: counterSale, role: "admin" },
 ];
+
 export default adminRoutes;

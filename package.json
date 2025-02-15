@@ -24,7 +24,13 @@
     "react-select": "^5.9.0",
     "react-switch": "^7.1.0",
     "react-toastify": "^11.0.3",
-    "xlsx": "^0.18.5"
+    "xlsx": "^0.18.5",
+    "html5-qrcode": "^2.3.8",
+    "file-saver": "^2.0.5",
+    "daisyui": "^4.12.23",
+    "dotenv": "^16.4.7",
+    "react-datepicker": "^7.6.0",
+    "react-paginate": "^8.2.0"
   },
   "devDependencies": {
     "@types/react": "^18.0.27",
