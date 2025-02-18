@@ -13,11 +13,12 @@ const material = lazy(() => import("../pages/attributes/Material"));
 const origin = lazy(() => import("../pages/attributes/Origin"));
 const size = lazy(() => import("../pages/attributes/Size"));
 const sleeve = lazy(() => import("../pages/attributes/Sleeve"));
-const employee = lazy(() => import("../pages/empoyeis/Employee"));
+const employee = lazy(() => import("../pages/employees/Employee"));
 const order = lazy(() => import("../pages/orders/Order"));
 const discount = lazy(() => import("../pages/discounts/Discount"));
 const detailOrder = lazy(() => import("../pages/detailOrder/DetailOrder"));
 const counterSale = lazy(() => import("../pages/counterSales/CounterSale"));
+const voucher = lazy(() => import("../pages/voucher/Voucher"));
 
 const adminRoutes = [
   { path: "customer", component: customer, role: "admin" },
@@ -38,6 +39,7 @@ const adminRoutes = [
   { path: "discount", component: discount, role: "admin" },
   { path: "detailOrder/:id", component: detailOrder, role: "admin" },
   { path: "counterSale", component: counterSale, role: "admin" },
+  { path: "voucher", component: voucher, role: "admin" },
 ];
 
 export default adminRoutes;

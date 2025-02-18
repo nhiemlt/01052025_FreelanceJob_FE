@@ -1,13 +1,20 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import {
-  FaChartBar,
+  FaChartPie,
   FaUserTie,
   FaStore,
-  FaBox,
+  FaClipboardList,
   FaUsers,
-  FaUndo,
+  FaReply,
   FaChevronDown,
+  FaCashRegister,
+  FaGift,
+  FaTshirt,
+  FaShapes,
+  FaTrademark,
+  FaGlobe,
+  FaMoneyBill ,
 } from "react-icons/fa";
 
 function SlideBar() {
@@ -22,14 +29,14 @@ function SlideBar() {
   };
 
   const productItems = [
-    { label: "Sản phẩm", icon: <FaBox />, path: "product" },
-    { label: "Chất liệu", icon: <FaBox />, path: "material" },
-    { label: "Cổ áo", icon: <FaBox />, path: "collar" },
-    { label: "Màu sắc", icon: <FaBox />, path: "color" },
-    { label: "Kích thước", icon: <FaBox />, path: "size" },
-    { label: "Tay áo", icon: <FaBox />, path: "sleeve" },
-    { label: "Thương hiệu", icon: <FaBox />, path: "brand" },
-    { label: "Xuất xứ", icon: <FaBox />, path: "origin" },
+    { label: "Sản phẩm", icon: <FaTshirt />, path: "product" },
+    { label: "Chất liệu", icon: <FaShapes />, path: "material" },
+    { label: "Cổ áo", icon: <FaShapes />, path: "collar" },
+    { label: "Màu sắc", icon: <FaShapes />, path: "color" },
+    { label: "Kích thước", icon: <FaShapes />, path: "size" },
+    { label: "Tay áo", icon: <FaShapes />, path: "sleeve" },
+    { label: "Thương hiệu", icon: <FaTrademark />, path: "brand" },
+    { label: "Xuất xứ", icon: <FaGlobe />, path: "origin" },
   ];
 
   const accountItems = [
@@ -38,9 +45,9 @@ function SlideBar() {
   ];
 
   return (
-    <div className="w-64 min-h-screen bg-base-200 shadow-lg p-4">
+    <div className="w-60 min-h-screen bg-base-200 shadow-lg p-4">
       <div className="flex justify-center mb-4">
-        <img src="/public/logo2.png" alt="Logo" className="w-24" />
+        <img src="/public/logo.png" alt="Logo" className="w-24" />
       </div>
 
       <ul className="menu w-full">
@@ -50,17 +57,7 @@ function SlideBar() {
             className={`menu-item ${activeMenu === "thongKe" ? "active" : ""}`}
             onClick={() => toggleMenu("thongKe")}
           >
-            <FaChartBar /> Thống kê
-          </Link>
-        </li>
-
-        <li>
-          <Link
-            to="/admin/customer"
-            className={`menu-item ${activeMenu === "nhanVien" ? "active" : ""}`}
-            onClick={() => toggleMenu("nhanVien")}
-          >
-            <FaUserTie /> Nhân Viên
+            <FaChartPie /> Thống kê
           </Link>
         </li>
 
@@ -70,7 +67,7 @@ function SlideBar() {
             className={`menu-item ${activeMenu === "banHangTaiQuay" ? "active" : ""}`}
             onClick={() => toggleMenu("banHangTaiQuay")}
           >
-            <FaStore /> Bán hàng tại quầy
+            <FaCashRegister /> Bán hàng tại quầy
           </Link>
         </li>
 
@@ -80,7 +77,7 @@ function SlideBar() {
             className={`menu-item ${activeMenu === "donHang" ? "active" : ""}`}
             onClick={() => toggleMenu("donHang")}
           >
-            <FaBox /> Đơn Hàng
+            <FaClipboardList /> Đơn Hàng
           </Link>
         </li>
 
@@ -91,7 +88,7 @@ function SlideBar() {
             onClick={() => toggleMenu("quanLySanPham")}
           >
             <span className="flex items-center gap-2">
-              <FaBox /> Quản lý sản phẩm
+              <FaTshirt /> Quản lý sản phẩm
             </span>
             <FaChevronDown className={`transition ${showProductMenu ? "rotate-180" : ""}`} />
           </div>
@@ -134,12 +131,17 @@ function SlideBar() {
 
         <li>
           <Link to="/admin/return" className="menu-item">
-            <FaUndo /> Trả Hàng
+            <FaReply /> Trả Hàng
           </Link>
         </li>
         <li>
-          <Link className="menu-item">
-            <FaBox /> Khuyến mãi
+          <Link to="/admin/promotion" className="menu-item">
+            <FaGift /> Khuyến mãi
+          </Link>
+        </li>
+        <li>
+          <Link to="/admin/voucher" className="menu-item">
+            <FaMoneyBill  /> Voucher
           </Link>
         </li>
       </ul>
